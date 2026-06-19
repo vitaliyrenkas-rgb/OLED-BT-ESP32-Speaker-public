@@ -49,7 +49,7 @@ i2s.begin(cfg);
   a2dp_sink.set_stream_reader(read_data_stream);
   a2dp_sink.set_avrc_rn_playstatus_callback(playback_status_callback);
 
-  a2dp_sink.start("Vitalik Speaker");
+  a2dp_sink.start("Vitalik Speaker LoLin");
 
   requestRedraw();
 }

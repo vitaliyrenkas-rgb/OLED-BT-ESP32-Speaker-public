@@ -48,11 +48,12 @@ void loop() {
     requestRedraw();
   }
 
-  // Periodic weather refresh intentionally disabled during BT era.
-  // Later: move refresh into advanced menu.
-  // if (!btConnected && now - lastWeatherUpdate > WEATHER_UPDATE_INTERVAL) {
-  //   updateWeatherCycle();
-  // }
+  // Periodic weather refresh.
+  // Safe v3.3 policy: refresh only when Bluetooth is not connected,
+  // because active Wi-Fi caused A2DP stutter in previous builds.
+  if (!btConnected && now - lastWeatherUpdate > WEATHER_UPDATE_INTERVAL) {
+  updateWeatherCycle();
+  }
 
   if (now - lastHeapLog > 10000) {
     lastHeapLog = now;

@@ -3,7 +3,7 @@
 
 // ================= OLED / REAL DEVICE PINS =================
 #define OLED_SDA 23
-#define OLED_SCL 22
+#define OLED_SCL 22 //LoLin ESP32 MicroPython Pin. Different from ESP DevKit
 
 // Your test module behaved as SH1106 in previous hard sketches.
 // If the real OLED is SSD1306 and image is shifted/wrong, replace constructor with:

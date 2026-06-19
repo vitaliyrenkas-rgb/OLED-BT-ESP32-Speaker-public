@@ -12,7 +12,12 @@ void drawLanguageSelectScreen() {
   // Use ASCII "UA" here because some Cyrillic fonts render "Укр." as a dot on this build.
   // Button 1 = left bottom option, button 3 = right bottom option.
   u8g2.setFont(u8g2_font_6x10_tr);
+
   u8g2.drawStr(12, 51, "En");
+
+  int buildW = u8g2.getStrWidth(BUILD_VERSION);
+  u8g2.drawStr((128 - buildW) / 2, 51, BUILD_VERSION);
+
   u8g2.drawStr(100, 51, "UA");
 
   u8g2.sendBuffer();
