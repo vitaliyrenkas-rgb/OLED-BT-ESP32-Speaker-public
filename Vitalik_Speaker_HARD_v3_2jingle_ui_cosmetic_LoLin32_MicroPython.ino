@@ -67,6 +67,10 @@
 //      - jingle plays through MAX98357A before Bluetooth A2DP starts.
 //      - Ukrainian clear-weather label changed from СОНЦЕ to ЯСНО.
 //      - brick equalizer raised by 2 px to avoid Cyrillic metadata overlap.
+//  16) v3.3 excluded jingle + AudioLibraries replacement:
+//      - replaced AUDIO Libraries due to IDE update
+//      - decomposed single .ino-file into git-structured project
+//      - PROD DEVICE TEST: ESP32 LoLin MicroPython with battery port. (PIN 23 replaced PIN 17 on DevKit for SCK on OLED)
 // =====================================================
 //  VITALIK SPEAKER — HARD / REAL DEVICE SKETCH v3.2 JINGLE + UI COSMETICS
 //  Real ESP32 only. NOT for Wokwi.
