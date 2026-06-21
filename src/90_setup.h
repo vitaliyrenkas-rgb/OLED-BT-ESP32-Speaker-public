@@ -53,6 +53,10 @@ i2s.begin(cfg);
   // Safe for mono MAX98357A speaker path; does not change I2S, callbacks, or stream reader.
   a2dp_sink.set_mono_downmix(true);
 
+  // v3.5: raise initial A2DP digital volume after hardware GND fix.
+  // Conservative level; 127 caused bass/contact swings on breadboard.
+  a2dp_sink.set_volume(100);
+
   a2dp_sink.start("Vitalik Speaker LoLin");
 
   requestRedraw();
