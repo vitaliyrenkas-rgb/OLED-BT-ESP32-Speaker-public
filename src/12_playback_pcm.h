@@ -36,7 +36,10 @@ void setPlaybackActive(bool active) {
 }
 
 uint8_t audioLevelToBricks() {
-  uint16_t level = pcmLevelRaw;
+  // OLEG v3.5-005:
+  // Make Player brick EQ about 30% more responsive without touching audio output.
+  uint32_t level = ((uint32_t)pcmLevelRaw * 14U) / 10U;
+  if (level > 65535U) level = 65535U;
 
   if (!playbackActive || millis() - lastPcmAudioMs > 700) return 0;
 
