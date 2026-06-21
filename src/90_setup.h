@@ -30,7 +30,7 @@ void setup() {
   // FIX v3.2: play short startup jingle before A2DP owns I2S.
   // playStartupJingle();
 
-auto cfg = i2s.defaultConfig(TX_MODE);
+auto cfg = i2s.defaultConfig();
 cfg.pin_bck = I2S_BCLK;
 cfg.pin_ws = I2S_LRC;
 cfg.pin_data = I2S_DOUT;
