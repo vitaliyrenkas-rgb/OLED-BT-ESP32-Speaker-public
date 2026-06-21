@@ -49,6 +49,10 @@ i2s.begin(cfg);
   a2dp_sink.set_stream_reader(read_data_stream);
   a2dp_sink.set_avrc_rn_playstatus_callback(playback_status_callback);
 
+  // v3.3 test: downmix stereo A2DP to mono before I2S output.
+  // Safe for mono MAX98357A speaker path; does not change I2S, callbacks, or stream reader.
+  a2dp_sink.set_mono_downmix(true);
+
   a2dp_sink.start("Vitalik Speaker LoLin");
 
   requestRedraw();
