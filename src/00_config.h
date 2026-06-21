@@ -13,6 +13,6 @@ const char* TZ_INFO = "EET-2EEST,M3.5.0/3,M10.5.0/4";
 
 const uint32_t CONFIG_VERSION = 1;
 
-const char* BUILD_VERSION = "v3.5-001"; // adding build version for debugging. shown on Language choose screen
+const char* BUILD_VERSION = "v3.5-002"; // adding build version for debugging. shown on Language choose screen
 
 const unsigned long WEATHER_UPDATE_INTERVAL = 1UL * 60UL * 60UL * 1000UL;
