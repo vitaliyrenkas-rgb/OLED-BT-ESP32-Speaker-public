@@ -18,12 +18,17 @@ void loop() {
   // FIX v3.0:
   // If Bluetooth is connected and music is playing, but user left UI on Clock/Weather,
   // return to Player after 1 minute of no button activity.
-  if (btConnected && playbackActive &&
-      (currentScreen == SCREEN_CLOCK || currentScreen == SCREEN_WEATHER) &&
-      millis() - lastUserInteractionMs > 60000) {
+  // OLEG v3.5-003:
+  // Weather is a quick-look screen: if BT is connected, return to Player after 1 minute
+  // even if playback is paused. Clock keeps the older playback-active behavior.
+  bool autoReturnFromClock = btConnected && playbackActive && currentScreen == SCREEN_CLOCK;
+  bool autoReturnFromWeather = btConnected && currentScreen == SCREEN_WEATHER;
+
+  if ((autoReturnFromClock || autoReturnFromWeather) &&
+      now - lastUserInteractionMs > 60000) {
     currentScreen = SCREEN_PLAYER;
     manualScreenLock = false;
-    lastUserInteractionMs = millis();
+    lastUserInteractionMs = now;
     requestRedraw();
   }
 

@@ -32,6 +32,7 @@ void drawWiFiIcon(int x, int y, bool connected) {
   u8g2.drawPixel(x + 3, y + 3);  // OLEG v3.5-002: bridge top gap
   u8g2.drawPixel(x + 5, y + 3);  // OLEG v3.5-002: bridge top gap
   u8g2.drawPixel(x + 4, y + 2);  // OLEG v3.5-002: bridge top gap
+  u8g2.drawPixel(x + 4, y + 4);  // OLEG v3.5-002: bridge top gap
   u8g2.drawPixel(x + 6, y + 3);
   u8g2.drawPixel(x + 7, y + 4);
   u8g2.drawPixel(x + 8, y + 5);
