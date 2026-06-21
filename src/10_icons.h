@@ -84,6 +84,26 @@ void drawSunIcon(int x, int y) {
   u8g2.drawLine(x + 13, y + 13, x + 11, y + 11);
 }
 
+void drawMoonIcon(int x, int y) {
+  // OLEG v3.5-001:
+  // Night variant for clear sky. Small filled crescent, readable on 128x64 OLED.
+  u8g2.drawDisc(x + 8, y + 8, 6);
+  u8g2.setDrawColor(0);
+  u8g2.drawDisc(x + 11, y + 6, 6);
+  u8g2.setDrawColor(1);
+
+  // Tiny star to make the night state obvious.
+  u8g2.drawPixel(x + 16, y + 13);
+  u8g2.drawPixel(x + 16, y + 15);
+  u8g2.drawPixel(x + 15, y + 14);
+  u8g2.drawPixel(x + 17, y + 14);
+}
+
+void drawClearSkyIcon(int x, int y) {
+  if (weatherIsNight) drawMoonIcon(x, y);
+  else drawSunIcon(x, y);
+}
+
 void drawCloudIcon(int x, int y) {
   // Filled cloud icon, not outline.
   u8g2.drawDisc(x + 6,  y + 10, 4);
@@ -108,7 +128,7 @@ void drawSnowIcon(int x, int y) {
 }
 
 void drawWeatherIcon(int x, int y) {
-  if (weatherState == "SUN") drawSunIcon(x, y);
+  if (weatherState == "SUN") drawClearSkyIcon(x, y);
   else if (weatherState == "RAIN") drawRainIcon(x, y);
   else if (weatherState == "SNOW") drawSnowIcon(x, y);
   else drawCloudIcon(x, y);

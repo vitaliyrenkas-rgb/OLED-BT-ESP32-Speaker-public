@@ -60,6 +60,7 @@ bool batteryPresent = true;
 float weatherTemp = 23.0;
 float weatherFeels = 24.0;
 String weatherState = "SUN"; // SUN / CLOUD / RAIN / SNOW
+bool weatherIsNight = false;  // OLEG v3.5-001: OpenWeather icon suffix n/d
 String weatherDesc = "Погода";
 
 unsigned long lastDraw = 0;

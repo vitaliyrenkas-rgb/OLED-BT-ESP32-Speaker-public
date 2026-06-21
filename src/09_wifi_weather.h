@@ -74,7 +74,9 @@ void updateWeatherFromAPI() {
       weatherFeels = doc["main"]["feels_like"] | 0.0;
       int weatherId = doc["weather"][0]["id"] | 800;
       const char* desc = doc["weather"][0]["description"] | "погода";
+      String weatherIconCode = String(doc["weather"][0]["icon"] | "01d");
       weatherDesc = String(desc);
+      weatherIsNight = weatherIconCode.endsWith("n");
 
       if (weatherId >= 200 && weatherId < 600) weatherState = "RAIN";
       else if (weatherId >= 600 && weatherId < 700) weatherState = "SNOW";
