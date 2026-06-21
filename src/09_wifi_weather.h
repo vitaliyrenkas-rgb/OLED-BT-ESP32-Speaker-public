@@ -72,6 +72,9 @@ void updateWeatherFromAPI() {
     if (!error) {
       weatherTemp = doc["main"]["temp"] | 0.0;
       weatherFeels = doc["main"]["feels_like"] | 0.0;
+      weatherHumidity = doc["main"]["humidity"] | -1;
+      if (weatherHumidity < 0 || weatherHumidity > 100) weatherHumidity = -1;
+
       int weatherId = doc["weather"][0]["id"] | 800;
       const char* desc = doc["weather"][0]["description"] | "погода";
       String weatherIconCode = String(doc["weather"][0]["icon"] | "01d");

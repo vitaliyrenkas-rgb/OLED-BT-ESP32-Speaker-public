@@ -70,6 +70,37 @@ void drawWeatherScreen() {
   drawTopBar();
 
   drawWeatherIcon(9, 16);
+  // OLEG v3.5-004: humidity block mirrors the weather icon on the right.
+  // Top: big humidity percent. Bottom: label aligned like weatherStateLabel().
+  if (weatherHumidity >= 0) {
+    String humidityNum = String(weatherHumidity);
+
+    u8g2.setFont(u8g2_font_7x14B_tr);
+    int humidityNumW = u8g2.getUTF8Width(humidityNum.c_str());
+    int humidityNumX = 111 - humidityNumW / 2;
+    if (humidityNumX < 88) humidityNumX = 88;
+
+    u8g2.setCursor(humidityNumX, 32);
+    u8g2.print(humidityNum);
+
+    u8g2.setFont(u8g2_font_5x8_tr);
+    u8g2.setCursor(humidityNumX + humidityNumW + 1, 27);
+    u8g2.print("%");
+  } else {
+    u8g2.setFont(u8g2_font_5x8_tr);
+    u8g2.setCursor(104, 32);
+    u8g2.print("--%");
+  }
+
+  u8g2.setFont(uiLang == LANG_UA ? u8g2_font_4x6_t_cyrillic : u8g2_font_5x8_tr);
+  const char* humidityLabel = (uiLang == LANG_UA) ? "ВОЛОГІСТЬ" : "HUMIDITY";
+  int humidityLabelW = u8g2.getUTF8Width(humidityLabel);
+  int humidityLabelX = 113 - humidityLabelW / 2;
+  if (humidityLabelX + humidityLabelW > 127) humidityLabelX = 127 - humidityLabelW;
+  if (humidityLabelX < 86) humidityLabelX = 86;
+
+  u8g2.setCursor(humidityLabelX, 50);
+  u8g2.print(humidityLabel);
 
   u8g2.setFont(u8g2_font_logisoso18_tn);
   u8g2.setCursor(50, 39);

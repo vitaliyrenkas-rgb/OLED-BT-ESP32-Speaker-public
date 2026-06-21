@@ -59,6 +59,7 @@ bool batteryPresent = true;
 
 float weatherTemp = 23.0;
 float weatherFeels = 24.0;
+int weatherHumidity = -1; // OLEG v3.5-004: relative humidity %, -1 = unknown
 String weatherState = "SUN"; // SUN / CLOUD / RAIN / SNOW
 bool weatherIsNight = false;  // OLEG v3.5-001: OpenWeather icon suffix n/d
 String weatherDesc = "Погода";
