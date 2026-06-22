@@ -22,11 +22,12 @@ void loop() {
   // Weather is a quick-look screen: if BT is connected, return to Player after 1 minute
   // even if playback is paused. Clock keeps the older playback-active behavior.
   bool autoReturnFromClock = btConnected && playbackActive && currentScreen == SCREEN_CLOCK;
-  bool autoReturnFromWeather = btConnected && currentScreen == SCREEN_WEATHER;
+  bool autoReturnFromWeatherToPlayer = btConnected && currentScreen == SCREEN_WEATHER;
+  bool autoReturnFromWeatherToClock = !btConnected && currentScreen == SCREEN_WEATHER;
 
-  if ((autoReturnFromClock || autoReturnFromWeather) &&
+  if ((autoReturnFromClock || autoReturnFromWeatherToPlayer || autoReturnFromWeatherToClock) &&
       now - lastUserInteractionMs > 60000) {
-    currentScreen = SCREEN_PLAYER;
+    currentScreen = autoReturnFromWeatherToClock ? SCREEN_CLOCK : SCREEN_PLAYER;
     manualScreenLock = false;
     lastUserInteractionMs = now;
     requestRedraw();
