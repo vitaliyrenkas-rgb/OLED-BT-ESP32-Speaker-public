@@ -93,7 +93,7 @@ void drawWeatherScreen() {
   }
 
   u8g2.setFont(uiLang == LANG_UA ? u8g2_font_4x6_t_cyrillic : u8g2_font_5x8_tr);
-  const char* humidityLabel = (uiLang == LANG_UA) ? "ВОЛОГІСТЬ" : "HUMIDITY";
+  const char* humidityLabel = (uiLang == LANG_UA) ? "ВОЛОГІСТЬ" : "HUMID";
   int humidityLabelW = u8g2.getUTF8Width(humidityLabel);
   int humidityLabelX = 113 - humidityLabelW / 2;
   if (humidityLabelX + humidityLabelW > 127) humidityLabelX = 127 - humidityLabelW;
