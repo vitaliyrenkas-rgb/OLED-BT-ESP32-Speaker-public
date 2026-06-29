@@ -22,7 +22,6 @@ void drawBTIconSmall(int x, int y) {
 }
 
 void drawWiFiIcon(int x, int y, bool connected) {
-  // FIX v2.11:
   // Cleaner pixel-art Wi-Fi icon aligned with BT icon.
 
   // outer arc
@@ -52,7 +51,25 @@ void drawWiFiIcon(int x, int y, bool connected) {
   u8g2.drawPixel(x + 4, y + 9);
 
   if (!connected) {
-    u8g2.drawLine(x + 9, y + 0, x + 0, y + 10);
+    // OLEG: crossed Wi-Fi, clipped inside 9x10 icon.
+    // No negative coordinates: avoids vertical OLED artefact.
+    u8g2.drawPixel(x + 8, y + 2);
+    u8g2.drawPixel(x + 7, y + 3);
+    u8g2.drawPixel(x + 6, y + 4);
+    u8g2.drawPixel(x + 5, y + 5);
+    u8g2.drawPixel(x + 4, y + 6);
+    u8g2.drawPixel(x + 3, y + 7);
+    u8g2.drawPixel(x + 2, y + 8);
+    u8g2.drawPixel(x + 1, y + 9);
+
+    // Tiny second stroke for readability, still inside icon bounds.
+    u8g2.drawPixel(x + 8, y + 3);
+    u8g2.drawPixel(x + 7, y + 4);
+    u8g2.drawPixel(x + 6, y + 5);
+    u8g2.drawPixel(x + 5, y + 6);
+    u8g2.drawPixel(x + 4, y + 7);
+    u8g2.drawPixel(x + 3, y + 8);
+    u8g2.drawPixel(x + 2, y + 9);
   }
 }
 
@@ -63,16 +80,23 @@ void drawBatteryUnavailableSlash(int x, int y) {
 }
 
 void drawBatteryIconCompact(int x, int y) {
+  // Clear icon area first, so charging animation can shrink cleanly after 100%.
+  u8g2.setDrawColor(0);
+  u8g2.drawBox(x, y - 1, 23, 10);
+  u8g2.setDrawColor(1);
+
   u8g2.drawFrame(x, y, 20, 8);
   u8g2.drawBox(x + 20, y + 2, 2, 4);
 
-  if (!batteryPresent || batteryPercent <= 0) {
+  if (!batteryPresent || (!batteryCharging && batteryPercent <= 0)) {
     drawBatteryUnavailableSlash(x, y);
     return;
   }
 
-  int fill = map(batteryPercent, 0, 100, 0, 18);
+  uint8_t shownPercent = getBatteryIconPercent();
+  int fill = map(shownPercent, 0, 100, 0, 18);
   fill = constrain(fill, 0, 18);
+
   u8g2.drawBox(x + 1, y + 1, fill, 6);
 }
 

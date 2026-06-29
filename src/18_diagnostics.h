@@ -11,6 +11,12 @@ void logHeapDiagnostics() {
   Serial.print(currentScreen);
   Serial.print(" | BT: ");
   Serial.print(btConnected ? "ON" : "OFF");
+  Serial.print(" | Bat: ");
+  Serial.print(batteryVoltage, 2);
+  Serial.print("V/");
+  Serial.print(batteryPercent);
+  Serial.print("%");
+  Serial.print(batteryCharging ? "/CHG" : "/BAT");
   Serial.print(" | WiFiSync: ");
   Serial.println(wifiLastSyncOk ? "OK" : "FAIL");
 }

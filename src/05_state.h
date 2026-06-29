@@ -56,6 +56,8 @@ uint32_t trackElapsedOffsetMs = 0;
 float batteryVoltage = 0.0;
 int batteryPercent = 85;
 bool batteryPresent = true;
+bool batteryCharging = false; // OLEG: inferred from GPIO34 battery voltage trend
+unsigned long batteryLastChargeRiseMs = 0;
 
 float weatherTemp = 23.0;
 float weatherFeels = 24.0;
