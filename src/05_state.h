@@ -56,7 +56,8 @@ uint32_t trackElapsedOffsetMs = 0;
 float batteryVoltage = 0.0;
 int batteryPercent = 85;
 bool batteryPresent = true;
-bool batteryCharging = false; // OLEG: inferred from GPIO34 battery voltage trend
+bool batteryCharging = false; // OLEG: true when USB/VBUS is present and battery is not full
+bool usbPowerPresent = false;   // OLEG: GPIO33 USB/VBUS sense through 100k/100k divider
 unsigned long batteryLastChargeRiseMs = 0;
 
 float weatherTemp = 23.0;

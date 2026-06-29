@@ -3,7 +3,10 @@
 
 // ================= BATTERY ADC =================
 #define BATTERY_ADC_PIN 34
+#define USB_VBUS_ADC_PIN 33
 const float ADC_REF_VOLTAGE = 3.30;
 const float ADC_MAX = 4095.0;
 const float DIVIDER_RATIO = 2.0;
+const float USB_VBUS_DIVIDER_RATIO = 2.0;
+const float USB_VBUS_PRESENT_VOLTAGE = 3.0;
 const float BATTERY_ABSENT_VOLTAGE = 0.50;

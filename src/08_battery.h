@@ -14,6 +14,22 @@ float readBatteryVoltage() {
   return adcVoltage * DIVIDER_RATIO;
 }
 
+float readUsbVbusVoltage() {
+  long sum = 0;
+
+  for (int i = 0; i < 8; i++) {
+    sum += analogRead(USB_VBUS_ADC_PIN);
+  }
+
+  float raw = sum / 8.0;
+  float adcVoltage = (raw / ADC_MAX) * ADC_REF_VOLTAGE;
+  return adcVoltage * USB_VBUS_DIVIDER_RATIO;
+}
+
+bool readUsbPowerPresent() {
+  return readUsbVbusVoltage() >= USB_VBUS_PRESENT_VOLTAGE;
+}
+
 int voltageToPercent(float v) {
   if (v < BATTERY_ABSENT_VOLTAGE) return 0;
   if (v >= 4.20) return 100;
@@ -30,67 +46,19 @@ int voltageToPercent(float v) {
 }
 
 void updateBatteryChargingState(float v) {
-  static float trendBaseVoltage = 0.0;
-  static unsigned long lastTrendCheckMs = 0;
-  static uint8_t riseHits = 0;
-  static uint8_t fallHits = 0;
-
-  unsigned long now = millis();
-
-  if (v < BATTERY_ABSENT_VOLTAGE) {
+  // GPIO33 senses USB/VBUS through a 100k/100k divider.
+  // GPIO34 still measures the battery itself.
+  // Do not infer unplug from battery noise: ADC/BAT can jump by ~30mV.
+  if (!usbPowerPresent || v < BATTERY_ABSENT_VOLTAGE || v >= 4.18) {
     batteryCharging = false;
-    trendBaseVoltage = 0.0;
-    riseHits = 0;
-    fallHits = 0;
+    batteryLastChargeRiseMs = millis();
     return;
   }
 
-  if (trendBaseVoltage <= 0.0) {
-    trendBaseVoltage = v;
-    lastTrendCheckMs = now;
-    batteryLastChargeRiseMs = now;
-    return;
-  }
-
-  // updateBattery() is called once per 10s; this keeps one trend sample per call.
-  if (now - lastTrendCheckMs < 9000UL) {
-    return;
-  }
-
-  lastTrendCheckMs = now;
-  float delta = v - trendBaseVoltage;
-
-  if (delta >= 0.010f) {
-    riseHits++;
-    fallHits = 0;
-    trendBaseVoltage = v;
-    batteryLastChargeRiseMs = now;
-
-    // Two consecutive +10mV steps: charging is very likely.
-    if (riseHits >= 2 && v < 4.18f) {
-      batteryCharging = true;
-    }
-  } else if (delta <= -0.020f) {
-    fallHits++;
-    riseHits = 0;
-    trendBaseVoltage = v;
-
-    // Two clear downward steps: charging stopped / running from battery.
-    if (fallHits >= 2) {
-      batteryCharging = false;
-    }
-  } else {
-    // Small ADC noise / flat voltage. Keep current state for a while, then stop animation.
-    if (batteryCharging && now - batteryLastChargeRiseMs > 20UL * 60UL * 1000UL) {
-      batteryCharging = false;
-    }
-  }
-
-  if (v >= 4.18f) {
-    batteryCharging = false;
-  }
-
+  batteryCharging = true;
+  batteryLastChargeRiseMs = millis();
 }
+
 uint8_t getBatteryIconPercent() {
   uint8_t realPercent = (uint8_t)constrain(batteryPercent, 0, 100);
 
@@ -142,6 +110,7 @@ uint8_t getBatteryIconPercent() {
 
 void updateBattery() {
   batteryVoltage = readBatteryVoltage();
+  usbPowerPresent = readUsbPowerPresent();
   batteryPresent = batteryVoltage >= BATTERY_ABSENT_VOLTAGE;
   batteryPercent = voltageToPercent(batteryVoltage);
   updateBatteryChargingState(batteryVoltage);

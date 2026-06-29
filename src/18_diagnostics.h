@@ -17,6 +17,8 @@ void logHeapDiagnostics() {
   Serial.print(batteryPercent);
   Serial.print("%");
   Serial.print(batteryCharging ? "/CHG" : "/BAT");
+  Serial.print(" | USB: ");
+  Serial.print(usbPowerPresent ? "ON" : "OFF");
   Serial.print(" | WiFiSync: ");
   Serial.println(wifiLastSyncOk ? "OK" : "FAIL");
 }

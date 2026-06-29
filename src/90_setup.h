@@ -7,6 +7,7 @@ void setup() {
 
   analogReadResolution(12);
   analogSetPinAttenuation(BATTERY_ADC_PIN, ADC_11db);
+  analogSetPinAttenuation(USB_VBUS_ADC_PIN, ADC_11db);
   updateBattery();
 
   Wire.begin(OLED_SDA, OLED_SCL);
