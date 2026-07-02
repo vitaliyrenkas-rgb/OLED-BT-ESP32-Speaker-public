@@ -95,12 +95,12 @@ void loadOrSelectLanguage() {
   delay(800);
 }
 
-// ================= OLEG CONFIG STORAGE =================
+// ================= CONFIG STORAGE =================
 // v3.5-007: storage layer only. Runtime wiring and web portal come next.
-const char* OLEG_CONFIG_NAMESPACE = "oleg_cfg";
-const uint32_t OLEG_CONFIG_VERSION = 1;
+const char* SPEAKER_CONFIG_NAMESPACE = "speaker_cfg";
+const uint32_t SPEAKER_CONFIG_VERSION = 1;
 
-String olegDefaultWeatherLocation() {
+String defaultWeatherLocation() {
   String city = String(WEATHER_CITY);
   String country = String(WEATHER_COUNTRY);
   city.trim();
@@ -112,7 +112,7 @@ String olegDefaultWeatherLocation() {
   return city + "," + country;
 }
 
-void splitOlegWeatherLocation(const String& location, String& city, String& country) {
+void splitWeatherLocation(const String& location, String& city, String& country) {
   String value = location;
   value.trim();
 
@@ -132,100 +132,100 @@ void splitOlegWeatherLocation(const String& location, String& city, String& coun
   if (country.length() == 0) country = WEATHER_COUNTRY;
 }
 
-void setOlegConfigDefaults() {
-  olegConfig.wifiSsid = WIFI_SSID;
-  olegConfig.wifiPass = WIFI_PASS;
-  olegConfig.weatherApiKey = WEATHER_API_KEY;
-  olegConfig.weatherLocation = olegDefaultWeatherLocation();
-  splitOlegWeatherLocation(olegConfig.weatherLocation, olegConfig.weatherCity, olegConfig.weatherCountry);
-  olegConfig.btDeviceName = "Vitalik Speaker LoLin PROD";
-  olegConfig.welcomeText = "Віталік! :)";
-  olegConfig.portalUser = "BTAdmin";
-  olegConfig.portalPass = "BTPassword";
-  olegConfig.loadedFromNvs = false;
+void setSpeakerConfigDefaults() {
+  speakerConfig.wifiSsid = WIFI_SSID;
+  speakerConfig.wifiPass = WIFI_PASS;
+  speakerConfig.weatherApiKey = WEATHER_API_KEY;
+  speakerConfig.weatherLocation = defaultWeatherLocation();
+  splitWeatherLocation(speakerConfig.weatherLocation, speakerConfig.weatherCity, speakerConfig.weatherCountry);
+  speakerConfig.btDeviceName = "Vitalik Speaker LoLin PROD";
+  speakerConfig.welcomeText = "Віталік! :)";
+  speakerConfig.portalUser = "BTAdmin";
+  speakerConfig.portalPass = "BTPassword";
+  speakerConfig.loadedFromNvs = false;
 }
 
-void normalizeOlegConfig() {
-  if (olegConfig.wifiSsid.length() == 0) olegConfig.wifiSsid = WIFI_SSID;
-  if (olegConfig.weatherApiKey.length() == 0) olegConfig.weatherApiKey = WEATHER_API_KEY;
-  if (olegConfig.weatherLocation.length() == 0) olegConfig.weatherLocation = olegDefaultWeatherLocation();
-  if (olegConfig.btDeviceName.length() == 0) olegConfig.btDeviceName = "Vitalik Speaker LoLin PROD";
-  if (olegConfig.welcomeText.length() == 0) olegConfig.welcomeText = "Віталік! :)";
-  if (olegConfig.portalUser.length() == 0) olegConfig.portalUser = "BTAdmin";
-  if (olegConfig.portalPass.length() == 0) olegConfig.portalPass = "BTPassword";
+void normalizeSpeakerConfig() {
+  if (speakerConfig.wifiSsid.length() == 0) speakerConfig.wifiSsid = WIFI_SSID;
+  if (speakerConfig.weatherApiKey.length() == 0) speakerConfig.weatherApiKey = WEATHER_API_KEY;
+  if (speakerConfig.weatherLocation.length() == 0) speakerConfig.weatherLocation = defaultWeatherLocation();
+  if (speakerConfig.btDeviceName.length() == 0) speakerConfig.btDeviceName = "Vitalik Speaker LoLin PROD";
+  if (speakerConfig.welcomeText.length() == 0) speakerConfig.welcomeText = "Віталік! :)";
+  if (speakerConfig.portalUser.length() == 0) speakerConfig.portalUser = "BTAdmin";
+  if (speakerConfig.portalPass.length() == 0) speakerConfig.portalPass = "BTPassword";
 
-  splitOlegWeatherLocation(olegConfig.weatherLocation, olegConfig.weatherCity, olegConfig.weatherCountry);
+  splitWeatherLocation(speakerConfig.weatherLocation, speakerConfig.weatherCity, speakerConfig.weatherCountry);
 }
 
-bool loadOlegConfig() {
-  setOlegConfigDefaults();
+bool loadSpeakerConfig() {
+  setSpeakerConfigDefaults();
 
   Preferences cfgPrefs;
-  if (!cfgPrefs.begin(OLEG_CONFIG_NAMESPACE, false)) {
-    Serial.println("OLEG config: NVS open failed, using defaults");
-    normalizeOlegConfig();
+  if (!cfgPrefs.begin(SPEAKER_CONFIG_NAMESPACE, false)) {
+    Serial.println("Config: NVS open failed, using defaults");
+    normalizeSpeakerConfig();
     return false;
   }
 
   uint32_t storedVersion = cfgPrefs.getUInt("cfgVer", 0);
-  if (storedVersion == OLEG_CONFIG_VERSION) {
-    olegConfig.wifiSsid = cfgPrefs.getString("wifiSsid", olegConfig.wifiSsid);
-    olegConfig.wifiPass = cfgPrefs.getString("wifiPass", olegConfig.wifiPass);
-    olegConfig.weatherApiKey = cfgPrefs.getString("weatherKey", olegConfig.weatherApiKey);
-    olegConfig.weatherLocation = cfgPrefs.getString("weatherLoc", olegConfig.weatherLocation);
-    olegConfig.btDeviceName = cfgPrefs.getString("btName", olegConfig.btDeviceName);
-    olegConfig.welcomeText = cfgPrefs.getString("welcome", olegConfig.welcomeText);
-    olegConfig.portalUser = cfgPrefs.getString("portalUser", olegConfig.portalUser);
-    olegConfig.portalPass = cfgPrefs.getString("portalPass", olegConfig.portalPass);
-    olegConfig.loadedFromNvs = true;
+  if (storedVersion == SPEAKER_CONFIG_VERSION) {
+    speakerConfig.wifiSsid = cfgPrefs.getString("wifiSsid", speakerConfig.wifiSsid);
+    speakerConfig.wifiPass = cfgPrefs.getString("wifiPass", speakerConfig.wifiPass);
+    speakerConfig.weatherApiKey = cfgPrefs.getString("weatherKey", speakerConfig.weatherApiKey);
+    speakerConfig.weatherLocation = cfgPrefs.getString("weatherLoc", speakerConfig.weatherLocation);
+    speakerConfig.btDeviceName = cfgPrefs.getString("btName", speakerConfig.btDeviceName);
+    speakerConfig.welcomeText = cfgPrefs.getString("welcome", speakerConfig.welcomeText);
+    speakerConfig.portalUser = cfgPrefs.getString("portalUser", speakerConfig.portalUser);
+    speakerConfig.portalPass = cfgPrefs.getString("portalPass", speakerConfig.portalPass);
+    speakerConfig.loadedFromNvs = true;
   }
 
   cfgPrefs.end();
-  normalizeOlegConfig();
+  normalizeSpeakerConfig();
 
-  Serial.print("OLEG config: ");
-  Serial.println(olegConfig.loadedFromNvs ? "loaded from NVS" : "defaults");
-  return olegConfig.loadedFromNvs;
+  Serial.print("Config: ");
+  Serial.println(speakerConfig.loadedFromNvs ? "loaded from NVS" : "defaults");
+  return speakerConfig.loadedFromNvs;
 }
 
-bool saveOlegConfig() {
-  normalizeOlegConfig();
+bool saveSpeakerConfig() {
+  normalizeSpeakerConfig();
 
   Preferences cfgPrefs;
-  if (!cfgPrefs.begin(OLEG_CONFIG_NAMESPACE, false)) {
-    Serial.println("OLEG config: NVS open failed, save skipped");
+  if (!cfgPrefs.begin(SPEAKER_CONFIG_NAMESPACE, false)) {
+    Serial.println("Config: NVS open failed, save skipped");
     return false;
   }
 
-  cfgPrefs.putUInt("cfgVer", OLEG_CONFIG_VERSION);
-  cfgPrefs.putString("wifiSsid", olegConfig.wifiSsid);
-  cfgPrefs.putString("wifiPass", olegConfig.wifiPass);
-  cfgPrefs.putString("weatherKey", olegConfig.weatherApiKey);
-  cfgPrefs.putString("weatherLoc", olegConfig.weatherLocation);
-  cfgPrefs.putString("btName", olegConfig.btDeviceName);
-  cfgPrefs.putString("welcome", olegConfig.welcomeText);
-  cfgPrefs.putString("portalUser", olegConfig.portalUser);
-  cfgPrefs.putString("portalPass", olegConfig.portalPass);
+  cfgPrefs.putUInt("cfgVer", SPEAKER_CONFIG_VERSION);
+  cfgPrefs.putString("wifiSsid", speakerConfig.wifiSsid);
+  cfgPrefs.putString("wifiPass", speakerConfig.wifiPass);
+  cfgPrefs.putString("weatherKey", speakerConfig.weatherApiKey);
+  cfgPrefs.putString("weatherLoc", speakerConfig.weatherLocation);
+  cfgPrefs.putString("btName", speakerConfig.btDeviceName);
+  cfgPrefs.putString("welcome", speakerConfig.welcomeText);
+  cfgPrefs.putString("portalUser", speakerConfig.portalUser);
+  cfgPrefs.putString("portalPass", speakerConfig.portalPass);
   cfgPrefs.end();
 
-  olegConfig.loadedFromNvs = true;
-  Serial.println("OLEG config: saved to NVS");
+  speakerConfig.loadedFromNvs = true;
+  Serial.println("Config: saved to NVS");
   return true;
 }
 
-void resetOlegConfigToDefaults(bool saveDefaults = false) {
+void resetSpeakerConfigToDefaults(bool saveDefaults = false) {
   Preferences cfgPrefs;
-  if (cfgPrefs.begin(OLEG_CONFIG_NAMESPACE, false)) {
+  if (cfgPrefs.begin(SPEAKER_CONFIG_NAMESPACE, false)) {
     cfgPrefs.clear();
     cfgPrefs.end();
   }
 
-  setOlegConfigDefaults();
-  normalizeOlegConfig();
+  setSpeakerConfigDefaults();
+  normalizeSpeakerConfig();
 
   if (saveDefaults) {
-    saveOlegConfig();
+    saveSpeakerConfig();
   } else {
-    Serial.println("OLEG config: reset to defaults in RAM");
+    Serial.println("Config: reset to defaults in RAM");
   }
 }

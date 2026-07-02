@@ -9,7 +9,7 @@ BluetoothA2DPSink a2dp_sink(i2s);
 Preferences prefs;
 
 
-struct OlegConfig {
+struct SpeakerConfig {
   String wifiSsid;
   String wifiPass;
   String weatherApiKey;
@@ -23,7 +23,7 @@ struct OlegConfig {
   bool loadedFromNvs;
 };
 
-OlegConfig olegConfig;
+SpeakerConfig speakerConfig;
 
 enum ScreenMode {
   SCREEN_PLAYER,
