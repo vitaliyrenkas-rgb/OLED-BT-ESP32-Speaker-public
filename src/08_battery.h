@@ -32,16 +32,20 @@ bool readUsbPowerPresent() {
 
 int voltageToPercent(float v) {
   if (v < BATTERY_ABSENT_VOLTAGE) return 0;
-  if (v >= 4.20) return 100;
-  if (v >= 4.10) return 90;
-  if (v >= 4.00) return 80;
-  if (v >= 3.90) return 70;
-  if (v >= 3.80) return 60;
-  if (v >= 3.70) return 50;
-  if (v >= 3.60) return 35;
-  if (v >= 3.50) return 20;
-  if (v >= 3.40) return 10;
-  if (v >= 3.30) return 5;
+
+  // v3.5-010: UI calibration for the actual JBL-style 1S pack/charger path.
+  // In this build the measured full/near-full battery voltage tops out around
+  // 3.94-4.00V, so the display uses 4.00V as the practical 100% point.
+  if (v >= BATTERY_FULL_VOLTAGE) return 100;
+  if (v >= 3.94) return 95;
+  if (v >= 3.88) return 90;
+  if (v >= 3.82) return 80;
+  if (v >= 3.76) return 70;
+  if (v >= 3.70) return 60;
+  if (v >= 3.62) return 45;
+  if (v >= 3.55) return 30;
+  if (v >= 3.45) return 15;
+  if (v >= 3.35) return 5;
   return 0;
 }
 
@@ -49,7 +53,7 @@ void updateBatteryChargingState(float v) {
   // GPIO33 senses USB/VBUS through a 100k/100k divider.
   // GPIO34 still measures the battery itself.
   // Do not infer unplug from battery noise: ADC/BAT can jump by ~30mV.
-  if (!usbPowerPresent || v < BATTERY_ABSENT_VOLTAGE || v >= 4.18) {
+  if (!usbPowerPresent || v < BATTERY_ABSENT_VOLTAGE || v >= BATTERY_FULL_VOLTAGE) {
     batteryCharging = false;
     batteryLastChargeRiseMs = millis();
     return;
@@ -155,11 +159,20 @@ void updateVolumeFromPot(unsigned long now) {
   if (!smoothingReady) {
     smoothedRaw = raw;
     smoothingReady = true;
-  } else if (abs(raw - smoothedRaw) > 900) {
-    // Large knob movement: follow immediately instead of slowly ramping.
-    smoothedRaw = raw;
   } else {
-    smoothedRaw = (smoothedRaw * 3 + raw) / 4;
+    int rawDelta = abs(raw - smoothedRaw);
+
+    if (rawDelta <= VOLUME_POT_RAW_DEADBAND) {
+      // Ignore small ADC/pot jitter so the overlay and volume do not twitch.
+      raw = smoothedRaw;
+    } else if (rawDelta >= VOLUME_POT_FAST_MOVE_RAW) {
+      // Large knob movement: follow immediately instead of slowly ramping.
+      smoothedRaw = raw;
+    } else {
+      // Keep the original slow-ish filter: lower sensitivity without making the
+      // knob faster than the stable baseline.
+      smoothedRaw = (smoothedRaw * 3 + raw) / 4;
+    }
   }
 
   int newVolume = volumeRawToValue(smoothedRaw);
@@ -194,8 +207,28 @@ void updateVolumeFromPot(unsigned long now) {
 }
 
 
+float smoothBatteryVoltage(float measuredVoltage) {
+  static bool filterReady = false;
+  static float filteredVoltage = 0.0;
+
+  float delta = measuredVoltage - filteredVoltage;
+  if (delta < 0) delta = -delta;
+
+  if (!filterReady || delta >= BATTERY_FILTER_FAST_DELTA) {
+    filteredVoltage = measuredVoltage;
+    filterReady = true;
+  } else {
+    // Battery ADC/load noise can jump enough to move the UI by 10-15%.
+    // Smooth the displayed voltage; the real battery changes slowly anyway.
+    filteredVoltage = (filteredVoltage * 3.0 + measuredVoltage) / 4.0;
+  }
+
+  return filteredVoltage;
+}
+
 void updateBattery() {
-  batteryVoltage = readBatteryVoltage();
+  float measuredVoltage = readBatteryVoltage();
+  batteryVoltage = smoothBatteryVoltage(measuredVoltage);
   usbPowerPresent = readUsbPowerPresent();
   batteryPresent = batteryVoltage >= BATTERY_ABSENT_VOLTAGE;
   batteryPercent = voltageToPercent(batteryVoltage);
