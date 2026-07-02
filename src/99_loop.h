@@ -3,6 +3,12 @@
 
 // ================= LOOP =================
 void loop() {
+  if (configPortalActive) {
+    handleConfigPortal();
+    delay(2);
+    return;
+  }
+
   unsigned long now = millis();
 
   if (currentScreen == SCREEN_GREETING && now >= greetingUntil) {

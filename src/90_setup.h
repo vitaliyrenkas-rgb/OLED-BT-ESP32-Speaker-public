@@ -18,8 +18,14 @@ void setup() {
   setupButtons();
   // FIX v2.13: No external reset pin. Config reset is BTN_PLAYER + BTN_WEATHER hold 5s.
   Serial.println("Config reset: hold BTN_PLAYER + BTN_WEATHER for 5 seconds");
+  Serial.println("Config portal: hold BTN_CLOCK during boot for OLEG-SETUP");
   loadOrSelectLanguage();
   loadSpeakerConfig();
+
+  if (configPortalRequestedAtBoot()) {
+    startConfigPortal("BTN_CLOCK boot hold");
+    return;
+  }
 
   currentScreen = SCREEN_GREETING;
   greetingUntil = millis() + 2500;

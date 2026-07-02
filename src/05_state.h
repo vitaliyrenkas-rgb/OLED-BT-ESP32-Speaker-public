@@ -2,11 +2,14 @@
 // Keep behavioral changes out of this structural split unless explicitly noted.
 
 // ================= STATE =================
+#include <WebServer.h>
 
 I2SStream i2s;
 BluetoothA2DPSink a2dp_sink(i2s);
 //BluetoothA2DPSink a2dp_sink;
 Preferences prefs;
+WebServer configPortalServer(80);
+bool configPortalActive = false;
 
 
 struct SpeakerConfig {
