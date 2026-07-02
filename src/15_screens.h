@@ -5,16 +5,19 @@
 void drawGreetingScreen() {
   u8g2.drawFrame(8, 12, 112, 40);
 
-  // FIX v2.8:
-  // Welcome screen supports both languages and uses two centered lines,
-  // so text does not go outside the frame.
+  // v3.5-008: second greeting line is runtime-configurable.
+  String welcomeLine = speakerConfig.welcomeText;
+  welcomeLine.trim();
+  if (welcomeLine.length() == 0) welcomeLine = "Віталік! :)";
+
   if (uiLang == LANG_UA) {
     centerText("Привіт,", 29, u8g2_font_6x12_t_cyrillic);
-    centerText("Віталік! :)", 44, u8g2_font_6x12_t_cyrillic);
   } else {
     centerText("Welcome", 29, u8g2_font_6x13_tr);
-    centerText("Vitalik! :)", 44, u8g2_font_6x13_tr);
   }
+
+  // Use Cyrillic-capable font for configured text; ASCII also renders fine.
+  centerText(welcomeLine, 44, u8g2_font_6x12_t_cyrillic);
 
   u8g2.drawHLine(24, 49, 80);
 }

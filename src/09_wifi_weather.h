@@ -11,7 +11,12 @@ void connectWiFi() {
   // Do NOT use WiFi.setSleep(false) with active Bluetooth A2DP.
   WiFi.setSleep(true);
 
-  WiFi.begin(WIFI_SSID, WIFI_PASS);
+  if (speakerConfig.wifiSsid.length() == 0) {
+    Serial.println("WiFi skipped: empty SSID");
+    return;
+  }
+
+  WiFi.begin(speakerConfig.wifiSsid.c_str(), speakerConfig.wifiPass.c_str());
 
   unsigned long start = millis();
   while (WiFi.status() != WL_CONNECTED && millis() - start < 12000) {
@@ -55,9 +60,27 @@ void updateWeatherFromAPI() {
 
   HTTPClient http;
 
+  String weatherCity = speakerConfig.weatherCity;
+  String weatherCountry = speakerConfig.weatherCountry;
+  String weatherApiKey = speakerConfig.weatherApiKey;
+  weatherCity.trim();
+  weatherCountry.trim();
+  weatherApiKey.trim();
+
+  if (weatherCity.length() == 0 || weatherApiKey.length() == 0) {
+    Serial.println("Weather skipped: missing city/API key");
+    return;
+  }
+
+  String weatherQuery = weatherCity;
+  if (weatherCountry.length() > 0) {
+    weatherQuery += ",";
+    weatherQuery += weatherCountry;
+  }
+
   String url = "http://api.openweathermap.org/data/2.5/weather?q=" +
-               String(WEATHER_CITY) + "," + String(WEATHER_COUNTRY) +
-               "&appid=" + String(WEATHER_API_KEY) +
+               weatherQuery +
+               "&appid=" + weatherApiKey +
                "&units=metric&lang=ua";
 
   http.begin(url);

@@ -60,7 +60,7 @@ i2s.begin(cfg);
   // Conservative level; 127 caused bass/contact swings on breadboard.
   a2dp_sink.set_volume(100);
 
-  a2dp_sink.start("Vitalik Speaker LoLin PROD");
+  a2dp_sink.start(speakerConfig.btDeviceName.c_str());
 
   requestRedraw();
 }

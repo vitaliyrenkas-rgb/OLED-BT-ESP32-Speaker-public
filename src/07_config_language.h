@@ -96,7 +96,7 @@ void loadOrSelectLanguage() {
 }
 
 // ================= CONFIG STORAGE =================
-// v3.5-007: storage layer only. Runtime wiring and web portal come next.
+// v3.5-008: storage layer plus runtime wiring. Web portal comes next.
 const char* SPEAKER_CONFIG_NAMESPACE = "speaker_cfg";
 const uint32_t SPEAKER_CONFIG_VERSION = 1;
 
@@ -185,6 +185,10 @@ bool loadSpeakerConfig() {
 
   Serial.print("Config: ");
   Serial.println(speakerConfig.loadedFromNvs ? "loaded from NVS" : "defaults");
+  Serial.print("Config BT name: ");
+  Serial.println(speakerConfig.btDeviceName);
+  Serial.print("Config weather location: ");
+  Serial.println(speakerConfig.weatherLocation);
   return speakerConfig.loadedFromNvs;
 }
 
