@@ -147,10 +147,46 @@ void drawMessageScreen() {
   u8g2.drawHLine(24, 49, 80);
 }
 
+
+void drawVolumeOverlayScreen() {
+  const char* title = (uiLang == LANG_UA) ? "Гучність" : "Volume";
+  String valueText = String(volumeOverlayPercent) + "%";
+
+  u8g2.setDrawColor(0);
+  u8g2.drawBox(0, 0, 128, 64);
+  u8g2.setDrawColor(1);
+
+  u8g2.drawFrame(0, 0, 128, 64);
+  u8g2.drawFrame(2, 2, 124, 60);
+
+  u8g2.setFont(uiLang == LANG_UA ? u8g2_font_6x12_t_cyrillic : u8g2_font_6x13_tr);
+  int titleW = u8g2.getUTF8Width(title);
+  u8g2.setCursor((128 - titleW) / 2, 18);
+  u8g2.print(title);
+
+  u8g2.drawHLine(14, 24, 100);
+
+  u8g2.setFont(u8g2_font_logisoso18_tn);
+  int numberW = u8g2.getUTF8Width(valueText.c_str());
+  u8g2.setFont(u8g2_font_6x12_tr);
+  int percentW = u8g2.getUTF8Width("%");
+
+  int valueX = (128 - (numberW + percentW + 2)) / 2;
+
+  u8g2.setFont(u8g2_font_logisoso18_tn);
+  u8g2.setCursor(valueX, 50);
+  u8g2.print(valueText);
+
+  u8g2.setFont(u8g2_font_6x12_tr);
+  u8g2.setCursor(valueX + numberW + 2, 48);
+  u8g2.print("%");
+}
+
 void drawUI() {
   u8g2.clearBuffer();
 
-  if (currentScreen == SCREEN_PLAYER) drawPlayerScreen();
+  if (volumeOverlayActive) drawVolumeOverlayScreen();
+  else if (currentScreen == SCREEN_PLAYER) drawPlayerScreen();
   else if (currentScreen == SCREEN_WEATHER) drawWeatherScreen();
   else if (currentScreen == SCREEN_MESSAGE) drawMessageScreen();
   else if (currentScreen == SCREEN_GREETING) drawGreetingScreen();

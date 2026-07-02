@@ -8,6 +8,7 @@ void setup() {
   analogReadResolution(12);
   analogSetPinAttenuation(BATTERY_ADC_PIN, ADC_11db);
   analogSetPinAttenuation(USB_VBUS_ADC_PIN, ADC_11db);
+  analogSetPinAttenuation(VOLUME_ADC_PIN, ADC_11db);
   updateBattery();
 
   Wire.begin(OLED_SDA, OLED_SCL);
@@ -58,7 +59,7 @@ i2s.begin(cfg);
   // Conservative level; 127 caused bass/contact swings on breadboard.
   a2dp_sink.set_volume(100);
 
-  a2dp_sink.start("Vitalik Speaker LoLin");
+  a2dp_sink.start("Vitalik Speaker LoLin PROD");
 
   requestRedraw();
 }

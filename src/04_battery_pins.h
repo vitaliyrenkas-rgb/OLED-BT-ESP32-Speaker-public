@@ -4,9 +4,16 @@
 // ================= BATTERY ADC =================
 #define BATTERY_ADC_PIN 34
 #define USB_VBUS_ADC_PIN 33
+#define VOLUME_ADC_PIN 35
 const float ADC_REF_VOLTAGE = 3.30;
 const float ADC_MAX = 4095.0;
 const float DIVIDER_RATIO = 2.0;
 const float USB_VBUS_DIVIDER_RATIO = 2.0;
 const float USB_VBUS_PRESENT_VOLTAGE = 3.0;
 const float BATTERY_ABSENT_VOLTAGE = 0.50;
+
+// ================= VOLUME POT ADC =================
+const unsigned long VOLUME_POT_UPDATE_INTERVAL = 150UL;
+const int VOLUME_POT_MIN_VOLUME = 0;
+const int VOLUME_POT_MAX_VOLUME = 127;
+const int VOLUME_POT_DEADBAND = 2;

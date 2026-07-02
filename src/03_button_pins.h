@@ -7,6 +7,7 @@
 #define BTN_CLOCK    16
 #define BTN_WEATHER  17
 
+
 // Separate service/config reset button, hold 2.5s during boot.
 // Do NOT use GPIO192 on classic ESP32: it does not exist.
-#define CONFIG_RESET_PIN 35
+#define CONFIG_RESET_PIN -1

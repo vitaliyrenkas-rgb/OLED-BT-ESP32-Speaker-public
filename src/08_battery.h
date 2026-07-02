@@ -108,6 +108,92 @@ uint8_t getBatteryIconPercent() {
   return animPercent;
 }
 
+int readVolumePotRaw() {
+  long sum = 0;
+
+  for (int i = 0; i < 8; i++) {
+    sum += analogRead(VOLUME_ADC_PIN);
+  }
+
+  return (int)(sum / 8);
+}
+
+int volumeRawToValue(int raw) {
+  raw = constrain(raw, 0, (int)ADC_MAX);
+
+  // Snap the ADC edges so the knob can reach exact 0 and 127.
+  if (raw <= 20) return VOLUME_POT_MIN_VOLUME;
+  if (raw >= 4050) return VOLUME_POT_MAX_VOLUME;
+
+  long volume = map(raw, 0, (long)ADC_MAX, VOLUME_POT_MIN_VOLUME, VOLUME_POT_MAX_VOLUME);
+  return constrain((int)volume, VOLUME_POT_MIN_VOLUME, VOLUME_POT_MAX_VOLUME);
+}
+
+int volumeValueToOverlayPercent(int volume) {
+  long percent = map(volume, VOLUME_POT_MIN_VOLUME, VOLUME_POT_MAX_VOLUME, 0, 100);
+  return constrain((int)percent, 0, 100);
+}
+
+void showVolumeOverlay(int appliedVolume, unsigned long now) {
+  volumeOverlayPercent = volumeValueToOverlayPercent(appliedVolume);
+  volumeOverlayLastChangeMs = now;
+  volumeOverlayActive = true;
+}
+
+void updateVolumeFromPot(unsigned long now) {
+  if (lastVolumePotReadMs != 0 && now - lastVolumePotReadMs < VOLUME_POT_UPDATE_INTERVAL) {
+    return;
+  }
+
+  lastVolumePotReadMs = now;
+
+  int raw = readVolumePotRaw();
+
+  static bool smoothingReady = false;
+  static int smoothedRaw = 0;
+
+  if (!smoothingReady) {
+    smoothedRaw = raw;
+    smoothingReady = true;
+  } else if (abs(raw - smoothedRaw) > 900) {
+    // Large knob movement: follow immediately instead of slowly ramping.
+    smoothedRaw = raw;
+  } else {
+    smoothedRaw = (smoothedRaw * 3 + raw) / 4;
+  }
+
+  int newVolume = volumeRawToValue(smoothedRaw);
+
+  volumePotRaw = smoothedRaw;
+  volumePotVolume = newVolume;
+
+  if (!volumePotReady) {
+    volumePotReady = true;
+    return;
+  }
+
+  // Do not touch A2DP volume until Bluetooth is connected.
+  // This keeps boot/discovery behavior close to the stable audio baseline.
+  if (!btConnected) {
+    volumePotAppliedVolume = -1;
+    return;
+  }
+
+  if (volumePotAppliedVolume < 0) {
+    volumePotAppliedVolume = newVolume;
+    a2dp_sink.set_volume(newVolume);
+    return;
+  }
+
+  if (abs(newVolume - volumePotAppliedVolume) >= VOLUME_POT_DEADBAND) {
+    volumePotAppliedVolume = newVolume;
+    a2dp_sink.set_volume(newVolume);
+    showVolumeOverlay(newVolume, now);
+    requestRedraw();
+  }
+}
+
+
 void updateBattery() {
   batteryVoltage = readBatteryVoltage();
   usbPowerPresent = readUsbPowerPresent();

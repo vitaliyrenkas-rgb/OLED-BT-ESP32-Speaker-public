@@ -60,6 +60,15 @@ bool batteryCharging = false; // OLEG: true when USB/VBUS is present and battery
 bool usbPowerPresent = false;   // OLEG: GPIO33 USB/VBUS sense through 100k/100k divider
 unsigned long batteryLastChargeRiseMs = 0;
 
+int volumePotRaw = 0;
+int volumePotVolume = 100;
+int volumePotAppliedVolume = -1;
+unsigned long lastVolumePotReadMs = 0;
+bool volumePotReady = false;
+bool volumeOverlayActive = false;
+unsigned long volumeOverlayLastChangeMs = 0;
+int volumeOverlayPercent = 100;
+
 float weatherTemp = 23.0;
 float weatherFeels = 24.0;
 int weatherHumidity = -1; // OLEG v3.5-004: relative humidity %, -1 = unknown

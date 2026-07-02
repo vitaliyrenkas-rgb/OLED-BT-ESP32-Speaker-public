@@ -14,6 +14,12 @@ void loop() {
   // It caused A2DP stutter in previous builds.
   handleConfigResetButton();
   handleButtons();
+  updateVolumeFromPot(now);
+
+  if (volumeOverlayActive && now - volumeOverlayLastChangeMs >= 2000UL) {
+    volumeOverlayActive = false;
+    requestRedraw();
+  }
 
   // FIX v3.0:
   // If Bluetooth is connected and music is playing, but user left UI on Clock/Weather,
