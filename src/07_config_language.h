@@ -94,3 +94,138 @@ void loadOrSelectLanguage() {
   u8g2.sendBuffer();
   delay(800);
 }
+
+// ================= OLEG CONFIG STORAGE =================
+// v3.5-007: storage layer only. Runtime wiring and web portal come next.
+const char* OLEG_CONFIG_NAMESPACE = "oleg_cfg";
+const uint32_t OLEG_CONFIG_VERSION = 1;
+
+String olegDefaultWeatherLocation() {
+  String city = String(WEATHER_CITY);
+  String country = String(WEATHER_COUNTRY);
+  city.trim();
+  country.trim();
+
+  if (city.length() == 0) city = "Zhytomyr";
+  if (country.length() == 0) country = "UA";
+
+  return city + "," + country;
+}
+
+void splitOlegWeatherLocation(const String& location, String& city, String& country) {
+  String value = location;
+  value.trim();
+
+  int comma = value.indexOf(',');
+  if (comma >= 0) {
+    city = value.substring(0, comma);
+    country = value.substring(comma + 1);
+  } else {
+    city = value;
+    country = WEATHER_COUNTRY;
+  }
+
+  city.trim();
+  country.trim();
+
+  if (city.length() == 0) city = WEATHER_CITY;
+  if (country.length() == 0) country = WEATHER_COUNTRY;
+}
+
+void setOlegConfigDefaults() {
+  olegConfig.wifiSsid = WIFI_SSID;
+  olegConfig.wifiPass = WIFI_PASS;
+  olegConfig.weatherApiKey = WEATHER_API_KEY;
+  olegConfig.weatherLocation = olegDefaultWeatherLocation();
+  splitOlegWeatherLocation(olegConfig.weatherLocation, olegConfig.weatherCity, olegConfig.weatherCountry);
+  olegConfig.btDeviceName = "Vitalik Speaker LoLin PROD";
+  olegConfig.welcomeText = "Віталік! :)";
+  olegConfig.portalUser = "BTAdmin";
+  olegConfig.portalPass = "BTPassword";
+  olegConfig.loadedFromNvs = false;
+}
+
+void normalizeOlegConfig() {
+  if (olegConfig.wifiSsid.length() == 0) olegConfig.wifiSsid = WIFI_SSID;
+  if (olegConfig.weatherApiKey.length() == 0) olegConfig.weatherApiKey = WEATHER_API_KEY;
+  if (olegConfig.weatherLocation.length() == 0) olegConfig.weatherLocation = olegDefaultWeatherLocation();
+  if (olegConfig.btDeviceName.length() == 0) olegConfig.btDeviceName = "Vitalik Speaker LoLin PROD";
+  if (olegConfig.welcomeText.length() == 0) olegConfig.welcomeText = "Віталік! :)";
+  if (olegConfig.portalUser.length() == 0) olegConfig.portalUser = "BTAdmin";
+  if (olegConfig.portalPass.length() == 0) olegConfig.portalPass = "BTPassword";
+
+  splitOlegWeatherLocation(olegConfig.weatherLocation, olegConfig.weatherCity, olegConfig.weatherCountry);
+}
+
+bool loadOlegConfig() {
+  setOlegConfigDefaults();
+
+  Preferences cfgPrefs;
+  if (!cfgPrefs.begin(OLEG_CONFIG_NAMESPACE, false)) {
+    Serial.println("OLEG config: NVS open failed, using defaults");
+    normalizeOlegConfig();
+    return false;
+  }
+
+  uint32_t storedVersion = cfgPrefs.getUInt("cfgVer", 0);
+  if (storedVersion == OLEG_CONFIG_VERSION) {
+    olegConfig.wifiSsid = cfgPrefs.getString("wifiSsid", olegConfig.wifiSsid);
+    olegConfig.wifiPass = cfgPrefs.getString("wifiPass", olegConfig.wifiPass);
+    olegConfig.weatherApiKey = cfgPrefs.getString("weatherKey", olegConfig.weatherApiKey);
+    olegConfig.weatherLocation = cfgPrefs.getString("weatherLoc", olegConfig.weatherLocation);
+    olegConfig.btDeviceName = cfgPrefs.getString("btName", olegConfig.btDeviceName);
+    olegConfig.welcomeText = cfgPrefs.getString("welcome", olegConfig.welcomeText);
+    olegConfig.portalUser = cfgPrefs.getString("portalUser", olegConfig.portalUser);
+    olegConfig.portalPass = cfgPrefs.getString("portalPass", olegConfig.portalPass);
+    olegConfig.loadedFromNvs = true;
+  }
+
+  cfgPrefs.end();
+  normalizeOlegConfig();
+
+  Serial.print("OLEG config: ");
+  Serial.println(olegConfig.loadedFromNvs ? "loaded from NVS" : "defaults");
+  return olegConfig.loadedFromNvs;
+}
+
+bool saveOlegConfig() {
+  normalizeOlegConfig();
+
+  Preferences cfgPrefs;
+  if (!cfgPrefs.begin(OLEG_CONFIG_NAMESPACE, false)) {
+    Serial.println("OLEG config: NVS open failed, save skipped");
+    return false;
+  }
+
+  cfgPrefs.putUInt("cfgVer", OLEG_CONFIG_VERSION);
+  cfgPrefs.putString("wifiSsid", olegConfig.wifiSsid);
+  cfgPrefs.putString("wifiPass", olegConfig.wifiPass);
+  cfgPrefs.putString("weatherKey", olegConfig.weatherApiKey);
+  cfgPrefs.putString("weatherLoc", olegConfig.weatherLocation);
+  cfgPrefs.putString("btName", olegConfig.btDeviceName);
+  cfgPrefs.putString("welcome", olegConfig.welcomeText);
+  cfgPrefs.putString("portalUser", olegConfig.portalUser);
+  cfgPrefs.putString("portalPass", olegConfig.portalPass);
+  cfgPrefs.end();
+
+  olegConfig.loadedFromNvs = true;
+  Serial.println("OLEG config: saved to NVS");
+  return true;
+}
+
+void resetOlegConfigToDefaults(bool saveDefaults = false) {
+  Preferences cfgPrefs;
+  if (cfgPrefs.begin(OLEG_CONFIG_NAMESPACE, false)) {
+    cfgPrefs.clear();
+    cfgPrefs.end();
+  }
+
+  setOlegConfigDefaults();
+  normalizeOlegConfig();
+
+  if (saveDefaults) {
+    saveOlegConfig();
+  } else {
+    Serial.println("OLEG config: reset to defaults in RAM");
+  }
+}

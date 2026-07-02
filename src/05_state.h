@@ -8,6 +8,23 @@ BluetoothA2DPSink a2dp_sink(i2s);
 //BluetoothA2DPSink a2dp_sink;
 Preferences prefs;
 
+
+struct OlegConfig {
+  String wifiSsid;
+  String wifiPass;
+  String weatherApiKey;
+  String weatherLocation;
+  String weatherCity;
+  String weatherCountry;
+  String btDeviceName;
+  String welcomeText;
+  String portalUser;
+  String portalPass;
+  bool loadedFromNvs;
+};
+
+OlegConfig olegConfig;
+
 enum ScreenMode {
   SCREEN_PLAYER,
   SCREEN_CLOCK,

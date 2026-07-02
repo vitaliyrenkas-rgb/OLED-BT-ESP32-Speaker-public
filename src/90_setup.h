@@ -19,6 +19,7 @@ void setup() {
   // FIX v2.13: No external reset pin. Config reset is BTN_PLAYER + BTN_WEATHER hold 5s.
   Serial.println("Config reset: hold BTN_PLAYER + BTN_WEATHER for 5 seconds");
   loadOrSelectLanguage();
+  loadOlegConfig();
 
   currentScreen = SCREEN_GREETING;
   greetingUntil = millis() + 2500;
