@@ -12,8 +12,7 @@ The project is built around an ESP32 board, a MAX98357A I2S amplifier module, an
 
 | Volume overlay | Back panel | Internal assembly |
 |---|---|---|
-| ![Volume overlay](docs/images/oled-speaker-volume.jpg) | ![Back panel](docs/images/oled-speaker-back.jpg) | ![Internal assembly](docs/images/oled-speaker-internals.jpg) |
-
+| ![Volume overlay](docs/images/oled-speaker-volume.jpg) | ![Back panel](docs/images/oled-speaker-back.jpg) |
 ## Features
 
 - Bluetooth Classic A2DP audio sink.
