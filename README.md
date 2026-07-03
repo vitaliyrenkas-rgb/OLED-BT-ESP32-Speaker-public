@@ -10,7 +10,7 @@ The project is built around an ESP32 board, a MAX98357A I2S amplifier module, an
 |---|---|---|
 | ![Player UI](docs/images/oled-speaker-player.jpg) | ![Weather UI](docs/images/oled-speaker-weather.jpg) | ![Clock UI](docs/images/oled-speaker-clock.jpg) |
 
-**| Volume overlay | Back panel |** 
+| Volume overlay | Back panel |
 |---|---|
 | ![Volume overlay](docs/images/oled-speaker-volume.jpg) | ![Back panel](docs/images/oled-speaker-back.jpg) |
 ## Features
