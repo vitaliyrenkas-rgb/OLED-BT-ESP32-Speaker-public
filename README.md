@@ -1,5 +1,21 @@
 # OLED BT Speaker — ESP32 Bluetooth Speaker with 128×64 OLED UI
+Слава Україні! 
+Вирішив поділитись своїм міні-прожєктом, а саме OLED Bluetooth-колонкою на базі ESP32 LoLin (USB + 5V Input) та монопідсилювачем MAX98357A.
+запіхнув ото усьо в стару компутєрну колонку Genius SP-120 (шо по хаті валялось).
 
+Дана збірка включає стабільну версію 3.5 з:
+- екраном привітання
+- час
+- погода (OpenWeather)
+- сам плеєр у WinAMP стилі
+- портал для налаштування колонки (рекомендовано змінити пароль після заливки фірмварі!)
+- ну і, звісно, котика ^_^
+
+Далі англійська версія від LLM. 
+Enjoy!
+
+--
+Glory to Ukraine!
 A DIY ESP32 Bluetooth speaker firmware with a small 128×64 OLED interface, local configuration portal, battery/charging telemetry, a physical volume knob, weather/clock/player screens, and a tiny sleeping-kitty idle screen.
 
 The project is built around an ESP32 board, a MAX98357A I2S amplifier module, and a monochrome 128×64 OLED display. The current firmware line is the stable v3.5 release candidate used in a real rebuilt desktop speaker enclosure.
