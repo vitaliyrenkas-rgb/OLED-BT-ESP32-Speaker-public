@@ -33,7 +33,8 @@ enum ScreenMode {
   SCREEN_CLOCK,
   SCREEN_WEATHER,
   SCREEN_MESSAGE,
-  SCREEN_GREETING
+  SCREEN_GREETING,
+  SCREEN_SLEEP
 };
 
 void drawNavBar(ScreenMode active);
@@ -104,6 +105,7 @@ unsigned long messageUntil = 0;
 unsigned long greetingUntil = 0;
 unsigned long lastHeapLog = 0;
 unsigned long lastUserInteractionMs = 0; // FIX v3.0: auto-return to Player idle timer
+unsigned long sleepScreenEnteredMs = 0;
 
 bool forceRedraw = true;
 

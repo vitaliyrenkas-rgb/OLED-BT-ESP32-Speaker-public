@@ -37,7 +37,10 @@ void handleButtons() {
     lastUserInteractionMs = millis();
     manualScreenLock = true;
 
-    if (btConnected) {
+    if (currentScreen == SCREEN_SLEEP) {
+      currentScreen = SCREEN_CLOCK;
+      manualScreenLock = false;
+    } else if (btConnected) {
       currentScreen = SCREEN_PLAYER;
     } else {
       returnScreen = SCREEN_CLOCK;

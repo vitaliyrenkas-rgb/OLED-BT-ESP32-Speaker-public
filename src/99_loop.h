@@ -45,6 +45,20 @@ void loop() {
     requestRedraw();
   }
 
+  // v3.5-012: idle sleep screen with static kitty + animated Z.
+  // Keep it BT-off only so active audio/player UI stays unchanged.
+  bool sleepAllowed = !btConnected && !volumeOverlayActive &&
+                      currentScreen != SCREEN_GREETING &&
+                      currentScreen != SCREEN_MESSAGE &&
+                      currentScreen != SCREEN_SLEEP;
+
+  if (sleepAllowed && now - lastUserInteractionMs > SLEEP_SCREEN_IDLE_MS) {
+    currentScreen = SCREEN_SLEEP;
+    sleepScreenEnteredMs = now;
+    manualScreenLock = false;
+    requestRedraw();
+  }
+
 
 
   // FIX v2.10:
@@ -85,6 +99,7 @@ void loop() {
   if (btConnected && currentScreen == SCREEN_PLAYER) refreshRate = 120; // FIX v2.9: smooth timer/EQ
   if (currentScreen == SCREEN_CLOCK) refreshRate = 1000;
   if (currentScreen == SCREEN_WEATHER) refreshRate = 1000;
+  if (currentScreen == SCREEN_SLEEP) refreshRate = SLEEP_Z_ANIMATION_MS;
 
   if (forceRedraw || now - lastDraw > refreshRate) {
     forceRedraw = false;

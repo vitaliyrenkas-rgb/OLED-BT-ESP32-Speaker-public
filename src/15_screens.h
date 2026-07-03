@@ -1,6 +1,8 @@
 // Auto-split from monolithic OLEG sketch.
 // Keep behavioral changes out of this structural split unless explicitly noted.
 
+#include "21_sleep_kitty_bitmap.h"
+
 // ================= SCREENS =================
 void drawGreetingScreen() {
   u8g2.drawFrame(8, 12, 112, 40);
@@ -136,6 +138,31 @@ void drawWeatherScreen() {
   drawNavBar(SCREEN_WEATHER);
 }
 
+
+void drawSleepZPixelGlyph(int x, int y, uint8_t scale) {
+  uint8_t w = scale * 3;
+  u8g2.drawBox(x, y, w, scale);
+  u8g2.drawBox(x, y + scale * 4, w, scale);
+
+  for (uint8_t i = 0; i < 3; i++) {
+    u8g2.drawBox(x + scale * (2 - i), y + scale * (1 + i), scale, scale);
+  }
+}
+
+void drawSleepZAnimation() {
+  uint8_t frame = (millis() / SLEEP_Z_ANIMATION_MS) % 3;
+
+  // v3.5-012: animate only the sleep letters; the cat bitmap stays static.
+  drawSleepZPixelGlyph(57, 17, 1);
+  if (frame >= 1) drawSleepZPixelGlyph(66, 12, 1);
+  if (frame >= 2) drawSleepZPixelGlyph(76, 5, 2);
+}
+
+void drawSleepScreen() {
+  u8g2.drawXBMP(0, 0, KITTY_SLEEP_WIDTH, KITTY_SLEEP_HEIGHT, kitty_sleep_128x64);
+  drawSleepZAnimation();
+}
+
 void drawMessageScreen() {
   u8g2.drawFrame(8, 12, 112, 40);
 
@@ -193,6 +220,7 @@ void drawUI() {
   else if (currentScreen == SCREEN_WEATHER) drawWeatherScreen();
   else if (currentScreen == SCREEN_MESSAGE) drawMessageScreen();
   else if (currentScreen == SCREEN_GREETING) drawGreetingScreen();
+  else if (currentScreen == SCREEN_SLEEP) drawSleepScreen();
   else drawClockScreen();
 
   u8g2.sendBuffer();
