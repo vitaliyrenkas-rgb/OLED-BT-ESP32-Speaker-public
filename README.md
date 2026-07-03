@@ -147,4 +147,7 @@ See [`RELEASE_NOTES.md`](RELEASE_NOTES.md) for the release history.
 
 ## License
 
-No formal license has been selected yet. Add one before publishing if you want others to reuse the code under clear terms.
+## License
+
+This project is released under the GNU GPL license.
+See [LICENSE](LICENSE) for details.
