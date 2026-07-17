@@ -19,6 +19,9 @@ void loop() {
   // No background Wi-Fi here.
   // It caused A2DP stutter in previous builds.
   handleConfigResetButton();
+#if OLEG4_DEBUG_ADKEY
+  logAdkeyCalibration();
+#endif
   handleButtons();
   updateVolumeFromPot(now);
 

@@ -24,9 +24,7 @@ void drawLanguageSelectScreen() {
 }
 
 bool checkConfigResetAtBoot() {
-  // FIX v2.13:
-  // External hard reset button disabled.
-  // Use BTN_PLAYER + BTN_WEATHER hold 5s during runtime instead.
+  // OLEG 4.0 Sister: no boot-time config reset combo on ADKEY.
   return false;
 }
 
@@ -61,7 +59,7 @@ void loadOrSelectLanguage() {
   unsigned long start = millis();
 
   while (true) {
-    if (digitalRead(BTN_PLAYER) == LOW) {
+    if (buttonDown(BUTTON_PLAYER)) {
       uiLang = LANG_EN;
       prefs.putString("lang", "en");
       prefs.putUInt("cfgVer", CONFIG_VERSION);
@@ -69,7 +67,7 @@ void loadOrSelectLanguage() {
       break;
     }
 
-    if (digitalRead(BTN_WEATHER) == LOW) {
+    if (buttonDown(BUTTON_WEATHER)) {
       uiLang = LANG_UA;
       prefs.putString("lang", "ua");
       prefs.putUInt("cfgVer", CONFIG_VERSION);
@@ -93,6 +91,28 @@ void loadOrSelectLanguage() {
   else centerText("Language saved", 34, u8g2_font_6x10_tr);
   u8g2.sendBuffer();
   delay(800);
+}
+
+
+void saveLanguagePreference() {
+  prefs.putString("lang", uiLang == LANG_UA ? "ua" : "en");
+  prefs.putUInt("cfgVer", CONFIG_VERSION);
+}
+
+void toggleRuntimeLanguage() {
+  uiLang = (uiLang == LANG_UA) ? LANG_EN : LANG_UA;
+  saveLanguagePreference();
+
+  u8g2.clearBuffer();
+  u8g2.drawFrame(8, 12, 112, 40);
+  if (uiLang == LANG_UA) centerText("UA saved", 35, u8g2_font_6x10_tr);
+  else centerText("EN saved", 35, u8g2_font_6x10_tr);
+  u8g2.sendBuffer();
+  delay(650);
+
+  lastUserInteractionMs = millis();
+  manualScreenLock = false;
+  requestRedraw();
 }
 
 // ================= CONFIG STORAGE =================

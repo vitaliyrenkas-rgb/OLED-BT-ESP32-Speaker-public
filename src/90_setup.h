@@ -8,22 +8,24 @@ void setup() {
   analogReadResolution(12);
   analogSetPinAttenuation(BATTERY_ADC_PIN, ADC_11db);
   analogSetPinAttenuation(USB_VBUS_ADC_PIN, ADC_11db);
-  analogSetPinAttenuation(VOLUME_ADC_PIN, ADC_11db);
+  if (VOLUME_POT_ENABLED && VOLUME_ADC_PIN >= 0) {
+    analogSetPinAttenuation(VOLUME_ADC_PIN, ADC_11db);
+  }
+  analogSetPinAttenuation(ADKEY_ADC_PIN, ADC_11db);
   updateBattery();
 
-  Wire.begin(OLED_SDA, OLED_SCL);
   u8g2.begin();
   u8g2.enableUTF8Print();
 
   setupButtons();
-  // FIX v2.13: No external reset pin. Config reset is BTN_PLAYER + BTN_WEATHER hold 5s.
-  Serial.println("Config reset: hold BTN_PLAYER + BTN_WEATHER for 5 seconds");
-  Serial.println("Config portal: hold BTN_CLOCK during boot for OLEG-SETUP");
+  Serial.println("OLEG 4 Sister: ADKEY buttons on GPIO35");
+  Serial.println("Runtime: hold BTN1 for 7s to toggle language");
+  Serial.println("Boot: hold BTN2 for 7s for OLEG-SETUP");
   loadOrSelectLanguage();
   loadSpeakerConfig();
 
   if (configPortalRequestedAtBoot()) {
-    startConfigPortal("BTN_CLOCK boot hold");
+    startConfigPortal("BTN2 boot hold");
     return;
   }
 
@@ -58,8 +60,7 @@ i2s.begin(cfg);
   a2dp_sink.set_stream_reader(read_data_stream);
   a2dp_sink.set_avrc_rn_playstatus_callback(playback_status_callback);
 
-  // v3.3 test: downmix stereo A2DP to mono before I2S output.
-  // Safe for mono MAX98357A speaker path; does not change I2S, callbacks, or stream reader.
+  // Keep stable v3.5 audio baseline for the first HU-055/PCM5102A target patch.
   a2dp_sink.set_mono_downmix(true);
 
   // v3.5: raise initial A2DP digital volume after hardware GND fix.

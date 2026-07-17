@@ -245,5 +245,5 @@ void drawUI() {
 }
 
 bool resetComboHeld() {
-  return digitalRead(BTN_PLAYER) == LOW && digitalRead(BTN_WEATHER) == LOW;
+  return false;
 }

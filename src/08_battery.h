@@ -145,6 +145,10 @@ void showVolumeOverlay(int appliedVolume, unsigned long now) {
 }
 
 void updateVolumeFromPot(unsigned long now) {
+  if (!VOLUME_POT_ENABLED) {
+    return;
+  }
+
   if (lastVolumePotReadMs != 0 && now - lastVolumePotReadMs < VOLUME_POT_UPDATE_INTERVAL) {
     return;
   }

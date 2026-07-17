@@ -143,14 +143,14 @@ void updateWeatherCycle() {
 // v3.5-009: AP/local web UI only. Do not keep Wi-Fi active during A2DP audio.
 const char* CONFIG_PORTAL_AP_SSID = "OLEG-SETUP";
 const char* CONFIG_PORTAL_URL = "http://192.168.4.1";
-const unsigned long CONFIG_PORTAL_BOOT_HOLD_MS = 1200;
+const unsigned long CONFIG_PORTAL_BOOT_HOLD_MS = 7000UL;
 
 bool configPortalRequestedAtBoot() {
-  if (digitalRead(BTN_CLOCK) != LOW) return false;
+  if (!buttonDown(BUTTON_CLOCK)) return false;
 
   unsigned long start = millis();
   while (millis() - start < CONFIG_PORTAL_BOOT_HOLD_MS) {
-    if (digitalRead(BTN_CLOCK) != LOW) return false;
+    if (!buttonDown(BUTTON_CLOCK)) return false;
     delay(20);
   }
 

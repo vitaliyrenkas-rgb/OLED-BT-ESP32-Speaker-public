@@ -4,7 +4,7 @@
 // ================= BATTERY ADC =================
 #define BATTERY_ADC_PIN 34
 #define USB_VBUS_ADC_PIN 33
-#define VOLUME_ADC_PIN 35
+#define VOLUME_ADC_PIN -1
 const float ADC_REF_VOLTAGE = 3.30;
 const float ADC_MAX = 4095.0;
 const float DIVIDER_RATIO = 2.0;
@@ -16,6 +16,8 @@ const float BATTERY_FILTER_FAST_DELTA = 0.18;
 
 
 // ================= VOLUME POT ADC =================
+// OLEG 4.0 Sister keeps the HU-055 stock analog volume knob in the amplifier path.
+const bool VOLUME_POT_ENABLED = false;
 const unsigned long VOLUME_POT_UPDATE_INTERVAL = 150UL;
 const int VOLUME_POT_MIN_VOLUME = 0;
 const int VOLUME_POT_MAX_VOLUME = 127;
