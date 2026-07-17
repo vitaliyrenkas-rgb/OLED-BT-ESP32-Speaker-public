@@ -79,6 +79,13 @@ void drawBatteryUnavailableSlash(int x, int y) {
   u8g2.drawLine(x + 20, y - 1, x + 1, y + 9);
 }
 
+void drawBatteryLowLightning(int x, int y) {
+  // v3.5-013: tiny lightning inside an empty battery at critical charge.
+  u8g2.drawLine(x + 12, y + 1, x + 8, y + 4);
+  u8g2.drawLine(x + 8, y + 4, x + 12, y + 4);
+  u8g2.drawLine(x + 12, y + 4, x + 7, y + 7);
+}
+
 void drawBatteryIconCompact(int x, int y) {
   // Clear icon area first, so charging animation can shrink cleanly after 100%.
   u8g2.setDrawColor(0);
@@ -90,6 +97,11 @@ void drawBatteryIconCompact(int x, int y) {
 
   if (!batteryPresent || (!batteryCharging && batteryPercent <= 0)) {
     drawBatteryUnavailableSlash(x, y);
+    return;
+  }
+
+  if (lowBatteryWarningCondition()) {
+    drawBatteryLowLightning(x, y);
     return;
   }
 

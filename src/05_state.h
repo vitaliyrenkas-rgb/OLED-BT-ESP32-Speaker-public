@@ -106,6 +106,11 @@ unsigned long greetingUntil = 0;
 unsigned long lastHeapLog = 0;
 unsigned long lastUserInteractionMs = 0; // FIX v3.0: auto-return to Player idle timer
 unsigned long sleepScreenEnteredMs = 0;
+bool lowBatteryWarningOverlayActive = false;
+unsigned long lowBatteryWarningOverlayStartedMs = 0;
+unsigned long lowBatteryWarningLastShownMs = 0;
+uint8_t lowBatteryWarningShownCount = 0;
+bool lowBatteryWarningWasLow = false;
 
 bool forceRedraw = true;
 

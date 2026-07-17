@@ -80,6 +80,8 @@ void loop() {
     requestRedraw();
   }
 
+  updateLowBatteryWarning(now);
+
   // Periodic weather refresh.
   // Safe v3.3 policy: refresh only when Bluetooth is not connected,
   // because active Wi-Fi caused A2DP stutter in previous builds.

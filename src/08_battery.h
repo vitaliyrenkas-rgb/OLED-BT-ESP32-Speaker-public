@@ -33,9 +33,9 @@ bool readUsbPowerPresent() {
 int voltageToPercent(float v) {
   if (v < BATTERY_ABSENT_VOLTAGE) return 0;
 
-  // v3.5-010: UI calibration for the actual JBL-style 1S pack/charger path.
+  // v3.5-013: UI calibration for the actual assembled speaker.
   // In this build the measured full/near-full battery voltage tops out around
-  // 3.94-4.00V, so the display uses 4.00V as the practical 100% point.
+  // 3.94-3.99V, so the display uses 3.96V as the practical 100% point.
   if (v >= BATTERY_FULL_VOLTAGE) return 100;
   if (v >= 3.94) return 95;
   if (v >= 3.88) return 90;
@@ -233,4 +233,50 @@ void updateBattery() {
   batteryPresent = batteryVoltage >= BATTERY_ABSENT_VOLTAGE;
   batteryPercent = voltageToPercent(batteryVoltage);
   updateBatteryChargingState(batteryVoltage);
+}
+
+
+bool lowBatteryWarningCondition() {
+  return batteryPresent && !usbPowerPresent && batteryPercent <= LOW_BATTERY_WARNING_PERCENT;
+}
+
+void resetLowBatteryWarningState() {
+  lowBatteryWarningOverlayActive = false;
+  lowBatteryWarningOverlayStartedMs = 0;
+  lowBatteryWarningLastShownMs = 0;
+  lowBatteryWarningShownCount = 0;
+  lowBatteryWarningWasLow = false;
+}
+
+void updateLowBatteryWarning(unsigned long now) {
+  bool lowNow = lowBatteryWarningCondition();
+
+  if (!lowNow) {
+    resetLowBatteryWarningState();
+    return;
+  }
+
+  if (!lowBatteryWarningWasLow) {
+    lowBatteryWarningWasLow = true;
+    lowBatteryWarningShownCount = 0;
+    lowBatteryWarningLastShownMs = 0;
+  }
+
+  if (lowBatteryWarningOverlayActive &&
+      now - lowBatteryWarningOverlayStartedMs >= LOW_BATTERY_WARNING_DURATION_MS) {
+    lowBatteryWarningOverlayActive = false;
+    requestRedraw();
+  }
+
+  if (lowBatteryWarningOverlayActive || lowBatteryWarningShownCount >= LOW_BATTERY_WARNING_MAX_COUNT) {
+    return;
+  }
+
+  if (lowBatteryWarningLastShownMs == 0 || now - lowBatteryWarningLastShownMs >= LOW_BATTERY_WARNING_INTERVAL_MS) {
+    lowBatteryWarningOverlayActive = true;
+    lowBatteryWarningOverlayStartedMs = now;
+    lowBatteryWarningLastShownMs = now;
+    lowBatteryWarningShownCount++;
+    requestRedraw();
+  }
 }

@@ -13,9 +13,14 @@ const char* TZ_INFO = "EET-2EEST,M3.5.0/3,M10.5.0/4";
 
 const uint32_t CONFIG_VERSION = 1;
 
-const char* BUILD_VERSION = "v3.5-012"; // Sleep screen kitty
+const char* BUILD_VERSION = "v3.5-013"; // Battery warning polish
 
 const unsigned long WEATHER_UPDATE_INTERVAL = 1UL * 60UL * 60UL * 1000UL;
 const unsigned long SLEEP_SCREEN_IDLE_MS = 5UL * 60UL * 1000UL;
 // const unsigned long SLEEP_SCREEN_IDLE_MS = 15UL * 1000UL; // for testing purpose
 const unsigned long SLEEP_Z_ANIMATION_MS = 650UL;
+
+const int LOW_BATTERY_WARNING_PERCENT = 5;
+const unsigned long LOW_BATTERY_WARNING_INTERVAL_MS = 5UL * 60UL * 1000UL;
+const unsigned long LOW_BATTERY_WARNING_DURATION_MS = 15UL * 1000UL;
+const uint8_t LOW_BATTERY_WARNING_MAX_COUNT = 4;

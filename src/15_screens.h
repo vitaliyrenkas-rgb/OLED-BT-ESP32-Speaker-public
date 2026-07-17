@@ -178,6 +178,23 @@ void drawMessageScreen() {
 }
 
 
+void drawLowBatteryOverlayScreen() {
+  const char* title = (uiLang == LANG_UA) ? "ЗАРЯДИ МЕНЕ" : "LOW BATTERY";
+
+  u8g2.setDrawColor(0);
+  u8g2.drawBox(0, 0, 128, 64);
+  u8g2.setDrawColor(1);
+
+  u8g2.drawFrame(0, 0, 128, 64);
+  u8g2.drawFrame(2, 2, 124, 60);
+
+  u8g2.setFont(uiLang == LANG_UA ? u8g2_font_6x12_t_cyrillic : u8g2_font_6x13_tr);
+  int titleW = u8g2.getUTF8Width(title);
+  u8g2.setCursor((128 - titleW) / 2, 35);
+  u8g2.print(title);
+}
+
+
 void drawVolumeOverlayScreen() {
   const char* title = (uiLang == LANG_UA) ? "Гучність" : "Volume";
   String valueText = String(volumeOverlayPercent) + "%";
@@ -216,6 +233,7 @@ void drawUI() {
   u8g2.clearBuffer();
 
   if (volumeOverlayActive) drawVolumeOverlayScreen();
+  else if (lowBatteryWarningOverlayActive) drawLowBatteryOverlayScreen();
   else if (currentScreen == SCREEN_PLAYER) drawPlayerScreen();
   else if (currentScreen == SCREEN_WEATHER) drawWeatherScreen();
   else if (currentScreen == SCREEN_MESSAGE) drawMessageScreen();
