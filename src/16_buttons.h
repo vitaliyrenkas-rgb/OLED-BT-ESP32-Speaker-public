@@ -101,6 +101,7 @@ void handleButtons() {
 
   static ButtonId activeButton = BUTTON_NONE;
   static unsigned long activeDownAt = 0;
+  static unsigned long lastSeenDownAt = 0;
   static bool longActionFired = false;
 
   unsigned long now = millis();
@@ -111,6 +112,8 @@ void handleButtons() {
       activeDownAt = now;
       longActionFired = false;
     }
+
+    lastSeenDownAt = now;
 
     if (activeButton == BUTTON_PLAYER &&
         !longActionFired &&
@@ -124,12 +127,24 @@ void handleButtons() {
   }
 
   if (activeButton != BUTTON_NONE) {
+    // ADKEY ladders can briefly decode as NONE while a button is still physically held.
+    // Do not globally debounce short presses; only give BTN1 long-hold detection a small
+    // dropout grace window so the 7-second language action is not reset by ADC noise.
+    unsigned long heldSoFar = now - activeDownAt;
+    if (!longActionFired &&
+        activeButton == BUTTON_PLAYER &&
+        heldSoFar >= 500UL &&
+        now - lastSeenDownAt <= BUTTON_HOLD_GRACE_MS) {
+      return;
+    }
+
     ButtonId releasedButton = activeButton;
-    unsigned long heldMs = now - activeDownAt;
+    unsigned long heldMs = lastSeenDownAt >= activeDownAt ? (lastSeenDownAt - activeDownAt) : (now - activeDownAt);
     bool consumedByLongAction = longActionFired;
 
     activeButton = BUTTON_NONE;
     activeDownAt = 0;
+    lastSeenDownAt = 0;
     longActionFired = false;
 
     if (!consumedByLongAction && heldMs >= BUTTON_SHORT_PRESS_MIN_MS) {

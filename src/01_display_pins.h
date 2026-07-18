@@ -8,7 +8,7 @@
 #define OLED_DIN 23
 #define OLED_CS  19
 #define OLED_DC  22
-#define OLED_RST 13
+#define OLED_RST 16
 
 U8G2_SSD1309_128X64_NONAME0_F_4W_SW_SPI u8g2(
   U8G2_R0,
