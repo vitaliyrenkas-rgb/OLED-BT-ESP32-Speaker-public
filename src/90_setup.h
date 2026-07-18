@@ -41,7 +41,7 @@ void setup() {
   // FIX v3.2: play short startup jingle before A2DP owns I2S.
   // playStartupJingle();
 
-auto cfg = i2s.defaultConfig();
+auto cfg = i2s.defaultConfig(TX_MODE);
 cfg.pin_bck = I2S_BCLK;
 cfg.pin_ws = I2S_LRC;
 cfg.pin_data = I2S_DOUT;
@@ -57,7 +57,7 @@ i2s.begin(cfg);
   a2dp_sink.set_avrc_metadata_callback(avrc_metadata_callback);
 
   // FIX v2.10: real audio level from PCM stream + AVRCP playback status.
-  a2dp_sink.set_stream_reader(read_data_stream);
+  a2dp_sink.set_stream_reader(read_data_stream, true);
   a2dp_sink.set_avrc_rn_playstatus_callback(playback_status_callback);
 
   // Keep stable v3.5 audio baseline for the first HU-055/PCM5102A target patch.
