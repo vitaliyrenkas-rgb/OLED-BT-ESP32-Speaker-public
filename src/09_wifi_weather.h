@@ -145,16 +145,40 @@ const char* CONFIG_PORTAL_AP_SSID = "OLEG-SETUP";
 const char* CONFIG_PORTAL_URL = "http://192.168.4.1";
 const unsigned long CONFIG_PORTAL_BOOT_HOLD_MS = 7000UL;
 
-bool configPortalRequestedAtBoot() {
-  if (!buttonDown(BUTTON_CLOCK)) return false;
+bool buttonHeldWithGrace(ButtonId button,
+                         unsigned long holdMs,
+                         unsigned long graceMs,
+                         const char* label) {
+  if (readButtonDown() != button) return false;
+
+  Serial.print("Button hold started: ");
+  Serial.println(label);
 
   unsigned long start = millis();
-  while (millis() - start < CONFIG_PORTAL_BOOT_HOLD_MS) {
-    if (!buttonDown(BUTTON_CLOCK)) return false;
+  unsigned long lastSeen = millis();
+
+  while (millis() - start < holdMs) {
+    if (readButtonDown() == button) {
+      lastSeen = millis();
+    } else if (millis() - lastSeen > graceMs) {
+      Serial.print("Button hold cancelled: ");
+      Serial.println(label);
+      return false;
+    }
+
     delay(20);
   }
 
+  Serial.print("Button hold accepted: ");
+  Serial.println(label);
   return true;
+}
+
+bool configPortalRequestedAtBoot() {
+  return buttonHeldWithGrace(BUTTON_CLOCK,
+                             CONFIG_PORTAL_BOOT_HOLD_MS,
+                             BUTTON_HOLD_GRACE_MS,
+                             "BTN2 boot setup");
 }
 
 String htmlEscape(String value) {

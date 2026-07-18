@@ -15,6 +15,7 @@ enum ButtonId {
 
 // HU-055 stand thresholds after adding external ADKEY pull-up (10k to 3V3).
 // Observed raw levels: idle ~= 4095, left/Player ~= 0, middle/Clock ~= 1805, right/Weather ~= 2860.
+// 4.0-007: keep measured bench windows; UX fixes live in the button state machine.
 const int ADKEY_PLAYER_MIN_RAW  = 0;
 const int ADKEY_PLAYER_MAX_RAW  = 180;
 const int ADKEY_CLOCK_MIN_RAW   = 1550;
@@ -24,7 +25,10 @@ const int ADKEY_WEATHER_MAX_RAW = 3150;
 const int ADKEY_NO_BUTTON_RAW   = 3700;
 
 const unsigned long BUTTON_SHORT_PRESS_MIN_MS = 40UL;
+const unsigned long BUTTON_RELEASE_STABLE_MS = 180UL;
+const unsigned long BUTTON_HOLD_GRACE_MS = 280UL;
 const unsigned long BUTTON_RUNTIME_HOLD_MS = 7000UL;
+const unsigned long BUTTON_LANGUAGE_SELECT_TIMEOUT_MS = 15000UL;
 
 ButtonId readButtonDown();
 bool buttonDown(ButtonId button);

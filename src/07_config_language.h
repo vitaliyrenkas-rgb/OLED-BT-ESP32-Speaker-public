@@ -28,6 +28,108 @@ bool checkConfigResetAtBoot() {
   return false;
 }
 
+void showLanguageSavedScreen() {
+  u8g2.clearBuffer();
+  u8g2.drawFrame(8, 12, 112, 40);
+  if (uiLang == LANG_UA) centerText("UA saved", 35, u8g2_font_6x10_tr);
+  else centerText("EN saved", 35, u8g2_font_6x10_tr);
+  u8g2.sendBuffer();
+  delay(650);
+}
+
+void showLanguageUnchangedScreen() {
+  u8g2.clearBuffer();
+  u8g2.drawFrame(8, 12, 112, 40);
+  centerText("No change", 35, u8g2_font_6x10_tr);
+  u8g2.sendBuffer();
+  delay(650);
+}
+
+void waitForAdkeyRelease(unsigned long stableMs = BUTTON_RELEASE_STABLE_MS,
+                         unsigned long timeoutMs = 5000UL) {
+  unsigned long start = millis();
+  unsigned long releasedSince = 0;
+
+  while (millis() - start < timeoutMs) {
+    if (readButtonDown() == BUTTON_NONE) {
+      if (releasedSince == 0) releasedSince = millis();
+      if (millis() - releasedSince >= stableMs) return;
+    } else {
+      releasedSince = 0;
+    }
+
+    delay(20);
+  }
+}
+
+ButtonId waitForLanguageChoice(unsigned long timeoutMs, bool defaultUaOnTimeout) {
+  unsigned long start = millis();
+  ButtonId pressedChoice = BUTTON_NONE;
+  unsigned long pressedAt = 0;
+
+  while (true) {
+    ButtonId down = readButtonDown();
+    bool isChoice = (down == BUTTON_PLAYER || down == BUTTON_WEATHER);
+
+    if (isChoice) {
+      if (pressedChoice != down) {
+        pressedChoice = down;
+        pressedAt = millis();
+      }
+    } else {
+      if (pressedChoice != BUTTON_NONE && millis() - pressedAt >= BUTTON_SHORT_PRESS_MIN_MS) {
+        return pressedChoice;
+      }
+      pressedChoice = BUTTON_NONE;
+      pressedAt = 0;
+    }
+
+    if (timeoutMs > 0 && millis() - start > timeoutMs) {
+      return defaultUaOnTimeout ? BUTTON_WEATHER : BUTTON_NONE;
+    }
+
+    delay(30);
+  }
+}
+
+void saveLanguagePreference() {
+  prefs.putString("lang", uiLang == LANG_UA ? "ua" : "en");
+  prefs.putUInt("cfgVer", CONFIG_VERSION);
+}
+
+bool selectLanguageFromMenu(bool waitReleaseFirst,
+                            unsigned long timeoutMs,
+                            bool defaultUaOnTimeout,
+                            const char* source) {
+  drawLanguageSelectScreen();
+
+  // Critical for ADKEY ladders: a long hold that opens this screen must not also
+  // auto-select the left option. Selection is accepted only after a fresh press+release.
+  if (waitReleaseFirst) {
+    Serial.println("Language menu: waiting for button release");
+    waitForAdkeyRelease();
+  }
+
+  ButtonId choice = waitForLanguageChoice(timeoutMs, defaultUaOnTimeout);
+  if (choice == BUTTON_NONE) {
+    Serial.print("Language menu timeout/no choice: ");
+    Serial.println(source);
+    showLanguageUnchangedScreen();
+    return false;
+  }
+
+  uiLang = (choice == BUTTON_WEATHER) ? LANG_UA : LANG_EN;
+  saveLanguagePreference();
+
+  Serial.print("Language selected ");
+  Serial.print(uiLang == LANG_UA ? "ua" : "en");
+  Serial.print(" from ");
+  Serial.println(source);
+
+  showLanguageSavedScreen();
+  return true;
+}
+
 void loadOrSelectLanguage() {
   prefs.begin("speaker", false);
 
@@ -51,64 +153,14 @@ void loadOrSelectLanguage() {
     return;
   }
 
-  drawLanguageSelectScreen();
-
-  // FIX v2.12:
-  // Do not block forever on language selection.
-  // If no button is pressed, default to UA after 10 seconds.
-  unsigned long start = millis();
-
-  while (true) {
-    if (buttonDown(BUTTON_PLAYER)) {
-      uiLang = LANG_EN;
-      prefs.putString("lang", "en");
-      prefs.putUInt("cfgVer", CONFIG_VERSION);
-      Serial.println("Language selected: en");
-      break;
-    }
-
-    if (buttonDown(BUTTON_WEATHER)) {
-      uiLang = LANG_UA;
-      prefs.putString("lang", "ua");
-      prefs.putUInt("cfgVer", CONFIG_VERSION);
-      Serial.println("Language selected: ua");
-      break;
-    }
-
-    if (millis() - start > 10000) {
-      uiLang = LANG_UA;
-      prefs.putString("lang", "ua");
-      prefs.putUInt("cfgVer", CONFIG_VERSION);
-      Serial.println("Language timeout: default ua");
-      break;
-    }
-
-    delay(40);
-  }
-
-  u8g2.clearBuffer();
-  if (uiLang == LANG_UA) centerText("UA saved", 34, u8g2_font_6x10_tr);
-  else centerText("Language saved", 34, u8g2_font_6x10_tr);
-  u8g2.sendBuffer();
-  delay(800);
-}
-
-
-void saveLanguagePreference() {
-  prefs.putString("lang", uiLang == LANG_UA ? "ua" : "en");
-  prefs.putUInt("cfgVer", CONFIG_VERSION);
+  // First boot: do not block forever. If nobody chooses, default to UA after 10s.
+  selectLanguageFromMenu(false, 10000UL, true, "first boot");
 }
 
 void toggleRuntimeLanguage() {
-  uiLang = (uiLang == LANG_UA) ? LANG_EN : LANG_UA;
-  saveLanguagePreference();
-
-  u8g2.clearBuffer();
-  u8g2.drawFrame(8, 12, 112, 40);
-  if (uiLang == LANG_UA) centerText("UA saved", 35, u8g2_font_6x10_tr);
-  else centerText("EN saved", 35, u8g2_font_6x10_tr);
-  u8g2.sendBuffer();
-  delay(650);
+  // Historical name kept for call sites. New behavior is safer:
+  // long BTN1 opens language select and waits for release before accepting anything.
+  selectLanguageFromMenu(true, BUTTON_LANGUAGE_SELECT_TIMEOUT_MS, false, "runtime BTN1 hold");
 
   lastUserInteractionMs = millis();
   manualScreenLock = false;

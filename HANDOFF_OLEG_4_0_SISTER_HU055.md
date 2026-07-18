@@ -304,3 +304,10 @@ git archive --format=zip --output=src_oleg4_sister_start.zip HEAD src
 ```
 
 Нормально будєт.
+
+## 2026-07-18 — v4.0-sister-007 ADKEY UX fix
+
+- BTN1 short: Player. BTN1 long: opens language selection, but does not auto-accept; release first, then BTN1=EN or BTN3=UA.
+- BTN2 short: Clock. BTN2 long at boot or runtime: OLEG-SETUP config portal. Hold detection has dropout grace for the ADKEY ladder.
+- BTN3 short: Weather. No long service action.
+- ADKEY windows widened around measured HU-055 values: BTN1 ~0, BTN2 ~1805, BTN3 ~2860, idle ~4095.
