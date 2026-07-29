@@ -11,7 +11,7 @@ const float DIVIDER_RATIO = 2.0;
 const float USB_VBUS_DIVIDER_RATIO = 2.0;
 const float USB_VBUS_PRESENT_VOLTAGE = 3.0;
 const float BATTERY_ABSENT_VOLTAGE = 0.50;
-const float BATTERY_FULL_VOLTAGE = 4.00;
+const float BATTERY_FULL_VOLTAGE = 3.94;
 const float BATTERY_FILTER_FAST_DELTA = 0.18;
 
 
