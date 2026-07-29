@@ -33,19 +33,19 @@ bool readUsbPowerPresent() {
 int voltageToPercent(float v) {
   if (v < BATTERY_ABSENT_VOLTAGE) return 0;
 
-  // v3.5-010: UI calibration for the actual JBL-style 1S pack/charger path.
-  // In this build the measured full/near-full battery voltage tops out around
-  // 3.94-4.00V, so the display uses 4.00V as the practical 100% point.
+  // v3.5-009: production UI calibration for the actual JBL-style 1S pack.
+  // The ready device reaches practical full around 3.94V on the ESP32 ADC path,
+  // so the UI treats 3.94V+ as 100% instead of waiting for 4.20V/4.00V.
   if (v >= BATTERY_FULL_VOLTAGE) return 100;
-  if (v >= 3.94) return 95;
   if (v >= 3.88) return 90;
   if (v >= 3.82) return 80;
   if (v >= 3.76) return 70;
-  if (v >= 3.70) return 60;
-  if (v >= 3.62) return 45;
-  if (v >= 3.55) return 30;
-  if (v >= 3.45) return 15;
-  if (v >= 3.35) return 5;
+  if (v >= 3.68) return 60;
+  if (v >= 3.60) return 45;
+  if (v >= 3.50) return 30;
+  if (v >= 3.40) return 20;
+  if (v >= 3.30) return 10;
+  if (v >= 3.18) return 5;
   return 0;
 }
 
