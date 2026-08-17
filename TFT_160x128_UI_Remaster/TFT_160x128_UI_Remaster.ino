@@ -4,7 +4,7 @@
 #include <U8g2_for_Adafruit_GFX.h>
 
 #include "ui_theme.h"
-#include "tft_ui_renderer.h"
+#include "tft_ui_renderer_approved.h"
 
 // OLEG TFT 1.8" 160x128 UI REMASTER — VISUAL SHOWROOM BENCH
 // Confirmed bench wiring:
