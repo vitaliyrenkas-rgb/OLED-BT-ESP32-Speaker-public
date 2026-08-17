@@ -6,50 +6,24 @@
 #include "ui_theme.h"
 #include "tft_ui_renderer.h"
 
-// =============================================================
 // OLEG TFT 1.8" 160x128 UI REMASTER — VISUAL SHOWROOM BENCH
-// =============================================================
-// Confirmed current bench wiring, 2026-08-17:
-//   TFT SCK/SCL  -> Lolita GPIO18
-//   TFT MOSI/SDA -> Lolita GPIO23
-//   TFT CS       -> Lolita GPIO19
-//   TFT DC/A0    -> Lolita GPIO22
-//   TFT RST/RES  -> Lolita GPIO16
-//   TFT GND      -> Lolita GND
-//   TFT LED/BL   -> Lolita 3V3
-//
-// Test orientation: landscape, rotation = 1.
-// Exact ST7735 init profile is still deliberately not guessed here.
-//
-// This remains a VISUAL BENCH:
-//   no SD, BT stack, Wi-Fi, battery ADC, buttons, audio or real sleep logic.
-// All values below are dummy values used only to exercise the complete UI.
-// =============================================================
+// Confirmed bench wiring:
+// SCLK=18, MOSI=23, CS=19, DC=22, RST=16, GND=GND, LED=3V3.
+// Proven previous smoke-test path: INITR_BLACKTAB, rotation=1, SPI=27MHz.
 
-#define OLEG_TFT_SCLK     18
-#define OLEG_TFT_MOSI     23
-#define OLEG_TFT_CS       19
-#define OLEG_TFT_DC       22
-#define OLEG_TFT_RST      16
-#define OLEG_TFT_ROTATION 1
+constexpr int TFT_SCLK = 18;
+constexpr int TFT_MOSI = 23;
+constexpr int TFT_CS   = 19;
+constexpr int TFT_DC   = 22;
+constexpr int TFT_RST  = 16;
+constexpr int TFT_MISO = -1;
+constexpr uint8_t TFT_ROTATION = 1;
+constexpr uint32_t TFT_SPI_HZ = 27000000UL;
 
-#ifndef OLEG_TFT_INITR
-  #error "Define OLEG_TFT_INITR to the confirmed Adafruit ST7735 initR profile for this exact module."
-#endif
-
-// Software SPI is deliberate for this isolated visual bench.
-Adafruit_ST7735 tft(
-  OLEG_TFT_CS,
-  OLEG_TFT_DC,
-  OLEG_TFT_MOSI,
-  OLEG_TFT_SCLK,
-  OLEG_TFT_RST
-);
-
+Adafruit_ST7735 tft(TFT_CS, TFT_DC, TFT_RST);
 TftUi::Renderer ui(tft);
 TftUi::Model model;
 
-// Every showroom scene remains visible for 30 seconds.
 static constexpr uint32_t SCENE_MS = 30000UL;
 static constexpr uint32_t FRAME_MS = 120UL;
 
@@ -60,8 +34,6 @@ struct DemoScene {
   const char *serialName;
 };
 
-// Full visual catalog approved for this TFT remaster.
-// Weather variants are separate scenes so every icon can be judged calmly.
 static const DemoScene demoScenes[] = {
   { TftUi::PLAYER,  "SUN",   false, "PLAYER + animated brick EQ" },
   { TftUi::CLOCK,   "SUN",   false, "CLOCK" },
@@ -88,7 +60,6 @@ static void loadScene(uint8_t index) {
   model.weatherState = scene.weatherState;
   model.weatherNight = scene.weatherNight;
 
-  // Common dummy content mirrors the real OLEG data hierarchy.
   model.topTime = "23:47";
   model.temperatureC = 21;
   model.duration = "02:36";
@@ -105,8 +76,6 @@ static void loadScene(uint8_t index) {
 }
 
 static void animateStatusIcons(uint32_t nowMs) {
-  // Six 5-second states fit exactly inside each 30-second scene.
-  // This exercises all top-bar semantic states without adding fake screens.
   uint8_t phase = (nowMs / 5000UL) % 6;
 
   model.btConnected = true;
@@ -116,30 +85,25 @@ static void animateStatusIcons(uint32_t nowMs) {
   model.batteryPercent = 82;
 
   switch (phase) {
-    case 0: // normal / healthy
+    case 0:
       model.batteryPercent = 82;
       break;
-
-    case 1: // charging lightning
+    case 1:
       model.batteryCharging = true;
       model.batteryPercent = 64;
       break;
-
-    case 2: // low-battery color
+    case 2:
       model.batteryPercent = 12;
       break;
-
-    case 3: // Wi-Fi crossed
+    case 3:
       model.wifiConnected = false;
       model.batteryPercent = 55;
       break;
-
-    case 4: // Bluetooth disconnected label
+    case 4:
       model.btConnected = false;
       model.batteryPercent = 55;
       break;
-
-    case 5: // battery unavailable slash
+    case 5:
       model.batteryPresent = false;
       model.batteryPercent = 0;
       break;
@@ -147,7 +111,6 @@ static void animateStatusIcons(uint32_t nowMs) {
 }
 
 static void animatePlayerEq(uint32_t nowMs) {
-  // Non-linear dummy PCM pattern: intentionally looks less like a sawtooth.
   static const uint8_t eqPattern[] = {
     2, 4, 6, 3, 7, 5, 2, 6,
     4, 1, 5, 7, 3, 6, 2, 5
@@ -159,7 +122,6 @@ static void animatePlayerEq(uint32_t nowMs) {
 }
 
 static void animateVolume(uint32_t nowMs) {
-  // 0 -> 100 -> 0 ping-pong over roughly 10 seconds.
   uint16_t p = (nowMs / 50UL) % 200;
   model.volumePercent = (p <= 100) ? p : 200 - p;
 }
@@ -170,33 +132,27 @@ void setup() {
 
   Serial.println();
   Serial.println("OLEG TFT 160x128 UI REMASTER / VISUAL SHOWROOM BENCH");
-  Serial.println("Dummy UI only: no buttons / BT / Wi-Fi / audio / ADC / SD.");
-  Serial.println("Pins: SCLK=18 MOSI=23 CS=19 DC=22 RST=16, LED=3V3");
-  Serial.println("Landscape rotation: 1");
+  Serial.println("Pins: SCLK=18 MOSI=23 CS=19 DC=22 RST=16 LED=3V3");
+  Serial.println("ST7735: INITR_BLACKTAB, rotation=1, SPI=27MHz");
   Serial.println("Scene duration: 30 seconds");
 
-  tft.initR(OLEG_TFT_INITR);
-  tft.setRotation(OLEG_TFT_ROTATION);
+  SPI.begin(TFT_SCLK, TFT_MISO, TFT_MOSI, TFT_CS);
+  tft.initR(INITR_BLACKTAB);
+  tft.setRotation(TFT_ROTATION);
+  tft.setSPISpeed(TFT_SPI_HZ);
   tft.fillScreen(TftUiTheme::BG);
 
   Serial.printf("TFT logical size: %d x %d\n", tft.width(), tft.height());
 
-  if (tft.width() != 160 || tft.height() != 128) {
-    Serial.println("STOP: logical canvas is not 160x128. Fix init profile before judging the UI.");
-  }
-
   ui.begin();
-
   loadScene(0);
   sceneStartedMs = millis();
-  lastFrameMs = 0;
 }
 
 void loop() {
   uint32_t nowMs = millis();
   model.nowMs = nowMs;
 
-  // Advance to the next visual scene every 30 seconds.
   if (nowMs - sceneStartedMs >= SCENE_MS) {
     demoSceneIndex = (demoSceneIndex + 1) % DEMO_SCENE_COUNT;
     loadScene(demoSceneIndex);
@@ -206,8 +162,6 @@ void loop() {
   if (nowMs - lastFrameMs < FRAME_MS) return;
   lastFrameMs = nowMs;
 
-  // Top-bar icons cycle through all their visual states on every screen
-  // where the top bar exists. Sleep and Volume simply ignore these fields.
   animateStatusIcons(nowMs);
 
   if (model.screen == TftUi::PLAYER) {
@@ -218,6 +172,5 @@ void loop() {
     animateVolume(nowMs);
   }
 
-  // Sleep Z animation is generated inside the renderer from model.nowMs.
   ui.draw(model);
 }
