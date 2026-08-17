@@ -2,16 +2,20 @@
 // Keep behavioral changes out of this structural split unless explicitly noted.
 
 // ================= BATTERY ADC =================
+// Post-calibration UI calibration for the actual assembled speaker.
+// 4.15V is treated as practical full; values around 4.08-4.10V are near-full
+// but should not force 100% or stop CHG indication.
 #define BATTERY_ADC_PIN 34
 #define USB_VBUS_ADC_PIN 33
 #define VOLUME_ADC_PIN -1
 const float ADC_REF_VOLTAGE = 3.30;
 const float ADC_MAX = 4095.0;
 const float DIVIDER_RATIO = 2.0;
+const float BATTERY_ADC_CALIBRATION = 1.08594;  // 4.17V real / 3.84V firmware
 const float USB_VBUS_DIVIDER_RATIO = 2.0;
 const float USB_VBUS_PRESENT_VOLTAGE = 3.0;
 const float BATTERY_ABSENT_VOLTAGE = 0.50;
-const float BATTERY_FULL_VOLTAGE = 3.96;
+const float BATTERY_FULL_VOLTAGE =4.15;
 const float BATTERY_FILTER_FAST_DELTA = 0.18;
 
 

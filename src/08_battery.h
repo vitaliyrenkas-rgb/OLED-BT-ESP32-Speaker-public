@@ -11,7 +11,7 @@ float readBatteryVoltage() {
 
   float raw = sum / 8.0;
   float adcVoltage = (raw / ADC_MAX) * ADC_REF_VOLTAGE;
-  return adcVoltage * DIVIDER_RATIO;
+  return adcVoltage * DIVIDER_RATIO * BATTERY_ADC_CALIBRATION;
 }
 
 float readUsbVbusVoltage() {
