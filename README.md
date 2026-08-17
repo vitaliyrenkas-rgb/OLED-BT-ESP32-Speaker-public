@@ -28,6 +28,7 @@ Arduino IDE / ESP32 classic target:
 - `src/01_display_pins.h` — OLED setup.
 - `src/02_audio_pins.h` — MAX98357A/I2S pins.
 - `src/03_button_pins.h` — button GPIO definitions.
+- `src/04_power_switch.h` — SW1 GPIO27 sensing, OLED power-save, deep sleep and wakeup.
 - `src/05_state.h` — global state and objects.
 - `src/07_config_language.h` — Preferences/language selection.
 - `src/09_wifi_weather.h` — Wi-Fi, NTP, weather.
@@ -37,6 +38,7 @@ Arduino IDE / ESP32 classic target:
 - `src/19_config_reset.h` — config/language reset combo.
 - `src/20_startup_jingle_disabled.h` — startup jingle block, currently disabled/legacy.
 - `archive/original/` — original monolithic sketch backup.
+- `docs/SW1_GPIO27_TEST.md` — wiring, expected voltages and bench smoke test.
 
 ## Notes
 
@@ -47,3 +49,9 @@ This preserves the original single-translation-unit Arduino behavior and avoids 
 
 The old startup jingle used legacy `driver/i2s.h` / `i2s_write()`.
 Under ESP32 core 3.3.8 + ESP32-A2DP 1.8.10 + AudioTools, that legacy jingle must remain disabled until rewritten through AudioTools.
+
+## v4.0-sister-009-sw1-deep-sleep
+
+- `GPIO27` reads the switched MH-M18 `VCC` point through a `91k/120k` divider.
+- Stable `SW1 OFF` for 500 ms turns the SSD1309 display off and enters ESP32 deep sleep.
+- `SW1 ON` wakes the ESP32 on RTC GPIO27 HIGH and starts normally.

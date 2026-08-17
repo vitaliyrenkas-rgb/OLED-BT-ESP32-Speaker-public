@@ -9,6 +9,13 @@
 
 # Changelog
 
+## 4.0-009 — SW1 GPIO27 deep sleep
+
+- Added GPIO27 sensing of the switched MH-M18 VCC rail through a 91k/120k divider.
+- A stable SW1 OFF level for 500 ms enables SSD1309 power-save and puts ESP32 into deep sleep.
+- SW1 ON wakes ESP32 through RTC GPIO27 and performs a normal boot.
+- Booting while SW1 is already OFF skips OLED, Wi-Fi, Bluetooth and I2S startup.
+
 ## structured-split-0.1
 
 - Split monolithic `.ino` into ordered `src/*.h` modules.

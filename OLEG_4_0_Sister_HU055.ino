@@ -117,6 +117,7 @@
 #include "src/02_audio_pins.h"
 #include "src/03_button_pins.h"
 #include "src/04_battery_pins.h"
+#include "src/04_power_switch.h"
 #include "src/05_state.h"
 #include "src/06_text_helpers.h"
 #include "src/07_config_language.h"

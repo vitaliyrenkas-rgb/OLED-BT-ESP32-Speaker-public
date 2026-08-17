@@ -3,6 +3,10 @@
 
 // ================= LOOP =================
 void loop() {
+  // Must run before the Config Portal early-return so SW1 can always put the
+  // speaker to sleep, including while OLEG-SETUP is active.
+  handlePowerSwitchRuntime();
+
   if (configPortalActive) {
     handleConfigPortal();
     delay(2);
