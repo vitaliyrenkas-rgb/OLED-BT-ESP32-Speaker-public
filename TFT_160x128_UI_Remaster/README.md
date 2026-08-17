@@ -31,27 +31,33 @@ Keep the original OLED composition and UI DNA:
 - procedural high-resolution sleep kitty so proportions/details can be tuned without regenerating a bitmap asset;
 - extra vertical space is used for breathing room, not for giant tiles/panels.
 
+## Current confirmed bench wiring — 2026-08-17
+
+- TFT SCK/SCL → Lolita GPIO18
+- TFT MOSI/SDA → Lolita GPIO23
+- TFT CS → Lolita GPIO19
+- TFT DC/A0 → Lolita GPIO22
+- TFT RST/RES → Lolita GPIO16
+- TFT GND → Lolita GND
+- TFT LED/backlight → ESP32 3.3V
+
+Backlight is powered directly from 3.3V for this bench; no GPIO/PWM control is part of this test.
+
 ## Files
 
 - `ui_theme.h` — palette and fixed 160×128 geometry.
 - `tft_ui_renderer.h` — hardware-independent renderer for Player / Clock / Weather / Volume / Sleep.
 - `TFT_160x128_UI_Remaster.ino` — isolated visual bench sketch.
 
-## Deliberately NOT defined
+## Still deliberately NOT defined
 
-The following remain unknown until confirmed from current physical wiring/module evidence:
+The following remain unknown until confirmed for this exact module:
 
-- TFT CS GPIO;
-- TFT DC GPIO;
-- TFT RST GPIO;
-- TFT MOSI GPIO;
-- TFT SCLK GPIO;
 - exact `Adafruit_ST7735::initR()` profile;
 - exact rotation value;
-- logic voltage tolerance;
-- backlight power/current topology.
+- TFT logic/VCC voltage topology beyond the separately confirmed 3.3V LED/backlight bench connection.
 
-The demo sketch therefore stops at compile time until the required `OLEG_TFT_*` macros are explicitly supplied.
+The demo sketch therefore still stops at compile time until `OLEG_TFT_INITR` and `OLEG_TFT_ROTATION` are explicitly supplied.
 
 ## Libraries
 
