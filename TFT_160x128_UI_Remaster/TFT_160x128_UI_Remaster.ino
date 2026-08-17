@@ -9,8 +9,17 @@
 // =============================================================
 // OLEG TFT 1.8" 160x128 UI REMASTER — ISOLATED VISUAL TEST
 // =============================================================
-// This sketch intentionally contains NO guessed wiring and NO guessed
-// ST7735 init profile. Fill these only from confirmed physical wiring/module.
+// Current bench wiring confirmed by user on 2026-08-17:
+//   TFT SCK/SCL  -> Lolita GPIO18
+//   TFT MOSI/SDA -> Lolita GPIO23
+//   TFT CS       -> Lolita GPIO19
+//   TFT DC/A0    -> Lolita GPIO22
+//   TFT RST/RES  -> Lolita GPIO16
+//   TFT GND      -> Lolita GND
+//
+// VCC/backlight topology is deliberately NOT defined here.
+// ST7735 init profile and rotation also remain unproven until confirmed
+// for this exact module.
 //
 // Required libraries:
 //   Adafruit GFX Library
@@ -20,21 +29,12 @@
 // This is UI-only: no SD, BT, Wi-Fi, battery ADC, sleep logic or audio.
 // =============================================================
 
-#ifndef OLEG_TFT_CS
-  #error "Define OLEG_TFT_CS from confirmed TFT wiring."
-#endif
-#ifndef OLEG_TFT_DC
-  #error "Define OLEG_TFT_DC from confirmed TFT wiring."
-#endif
-#ifndef OLEG_TFT_RST
-  #error "Define OLEG_TFT_RST from confirmed TFT wiring (or -1 only if physically confirmed appropriate)."
-#endif
-#ifndef OLEG_TFT_MOSI
-  #error "Define OLEG_TFT_MOSI from confirmed TFT wiring."
-#endif
-#ifndef OLEG_TFT_SCLK
-  #error "Define OLEG_TFT_SCLK from confirmed TFT wiring."
-#endif
+#define OLEG_TFT_SCLK 18
+#define OLEG_TFT_MOSI 23
+#define OLEG_TFT_CS   19
+#define OLEG_TFT_DC   22
+#define OLEG_TFT_RST  16
+
 #ifndef OLEG_TFT_INITR
   #error "Define OLEG_TFT_INITR to the confirmed Adafruit ST7735 initR profile for this module."
 #endif
@@ -73,6 +73,7 @@ void setup() {
   Serial.println();
   Serial.println("OLEG TFT 160x128 UI REMASTER / isolated visual test");
   Serial.println("No BT / Wi-Fi / SD / battery ADC / audio in this sketch.");
+  Serial.println("Bench pins: SCLK=18 MOSI=23 CS=19 DC=22 RST=16");
 
   tft.initR(OLEG_TFT_INITR);
   tft.setRotation(OLEG_TFT_ROTATION);
