@@ -55,3 +55,5 @@ Under ESP32 core 3.3.8 + ESP32-A2DP 1.8.10 + AudioTools, that legacy jingle must
 - `GPIO27` reads the switched MH-M18 `VCC` point through a `91k/120k` divider.
 - Stable `SW1 OFF` for 500 ms turns the SSD1309 display off and enters ESP32 deep sleep.
 - `SW1 ON` wakes the ESP32 on RTC GPIO27 HIGH and starts normally.
+- Added HU-055 Custom BT Speaker photos:
+
