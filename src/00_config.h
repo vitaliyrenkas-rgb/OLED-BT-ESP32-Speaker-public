@@ -11,7 +11,7 @@ const char* WEATHER_COUNTRY = "Your_Country";
 
 const char* TZ_INFO = "EET-2EEST,M3.5.0/3,M10.5.0/4";
 
-const uint32_t CONFIG_VERSION = 1;
+const uint32_t CONFIG_VERSION = 2;  // USA Gift: force fresh EN language config
 
 const char* BUILD_VERSION = "4.0-010";
 

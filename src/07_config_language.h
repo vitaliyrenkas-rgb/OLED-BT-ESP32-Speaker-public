@@ -153,8 +153,13 @@ void loadOrSelectLanguage() {
     return;
   }
 
-  // First boot: do not block forever. If nobody chooses, default to UA after 10s.
-  selectLanguageFromMenu(false, 10000UL, true, "first boot");
+  // HU-055 USA Gift Build:
+  // Fresh config starts directly in English.
+  // Runtime BTN1 language menu remains available as an easter egg.
+  uiLang = LANG_EN;
+  saveLanguagePreference();
+
+  Serial.println("USA Gift: default language set to EN");
 }
 
 void toggleRuntimeLanguage() {
@@ -170,7 +175,7 @@ void toggleRuntimeLanguage() {
 // ================= CONFIG STORAGE =================
 // v3.5-008: storage layer plus runtime wiring. Web portal comes next.
 const char* SPEAKER_CONFIG_NAMESPACE = "speaker_cfg";
-const uint32_t SPEAKER_CONFIG_VERSION = 1;
+const uint32_t SPEAKER_CONFIG_VERSION = 2; // USA Gift: ignore old Sister speaker config
 
 String defaultWeatherLocation() {
   String city = String(WEATHER_CITY);
@@ -210,8 +215,8 @@ void setSpeakerConfigDefaults() {
   speakerConfig.weatherApiKey = WEATHER_API_KEY;
   speakerConfig.weatherLocation = defaultWeatherLocation();
   splitWeatherLocation(speakerConfig.weatherLocation, speakerConfig.weatherCity, speakerConfig.weatherCountry);
-  speakerConfig.btDeviceName = "Vitalik Speaker LoLin PROD";
-  speakerConfig.welcomeText = "Віталік! :)";
+  speakerConfig.btDeviceName = "Ljiljana's Speaker LoLin PROD";
+  speakerConfig.welcomeText = "Ljiljana! :)";
   speakerConfig.portalUser = "BTAdmin";
   speakerConfig.portalPass = "BTPassword";
   speakerConfig.loadedFromNvs = false;
@@ -221,8 +226,8 @@ void normalizeSpeakerConfig() {
   if (speakerConfig.wifiSsid.length() == 0) speakerConfig.wifiSsid = WIFI_SSID;
   if (speakerConfig.weatherApiKey.length() == 0) speakerConfig.weatherApiKey = WEATHER_API_KEY;
   if (speakerConfig.weatherLocation.length() == 0) speakerConfig.weatherLocation = defaultWeatherLocation();
-  if (speakerConfig.btDeviceName.length() == 0) speakerConfig.btDeviceName = "Vitalik Speaker LoLin PROD";
-  if (speakerConfig.welcomeText.length() == 0) speakerConfig.welcomeText = "Віталік! :)";
+  if (speakerConfig.btDeviceName.length() == 0) speakerConfig.btDeviceName = "Ljiljana's Speaker LoLin PROD";
+  if (speakerConfig.welcomeText.length() == 0) speakerConfig.welcomeText = "Ljiljana! :)";
   if (speakerConfig.portalUser.length() == 0) speakerConfig.portalUser = "BTAdmin";
   if (speakerConfig.portalPass.length() == 0) speakerConfig.portalPass = "BTPassword";
 

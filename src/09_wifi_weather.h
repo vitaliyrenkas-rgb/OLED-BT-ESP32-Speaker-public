@@ -210,7 +210,7 @@ String buildConfigPortalPage(const String& notice = "") {
   String html;
   html.reserve(6500);
 
-  html += F("<!doctype html><html lang=\"uk\"><head><meta charset=\"utf-8\">");
+  html += F("<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">");
   html += F("<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">");
   html += F("<title>OLEG Config Portal</title>");
   html += F("<style>");

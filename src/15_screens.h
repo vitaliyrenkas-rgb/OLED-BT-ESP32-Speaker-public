@@ -10,7 +10,7 @@ void drawGreetingScreen() {
   // v3.5-008: second greeting line is runtime-configurable.
   String welcomeLine = speakerConfig.welcomeText;
   welcomeLine.trim();
-  if (welcomeLine.length() == 0) welcomeLine = "Віталік! :)";
+  if (welcomeLine.length() == 0) welcomeLine = "Ljiljana! :)";
 
   if (uiLang == LANG_UA) {
     centerText("Привіт,", 29, u8g2_font_6x12_t_cyrillic);

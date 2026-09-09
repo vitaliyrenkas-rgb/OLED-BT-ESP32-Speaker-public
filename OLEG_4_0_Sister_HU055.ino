@@ -10,7 +10,7 @@
 #include "BluetoothA2DPSink.h"
 // #include "driver/i2s.h"
 #include <math.h>
-
+  
 //  8) UI patch v2.8:
 //     - Wi-Fi icon redrawn smaller and kept above topbar line.
 //     - language selection screen simplified: En left, Укр. right.
