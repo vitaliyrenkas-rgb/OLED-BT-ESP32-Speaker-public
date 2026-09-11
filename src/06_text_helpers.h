@@ -3,7 +3,7 @@
 
 // ================= TEXT HELPERS =================
 int textW(const String &s) {
-  return u8g2.getUTF8Width(s.c_str());
+  return tftText.getUTF8Width(s.c_str());
 }
 
 void requestRedraw() {
@@ -11,12 +11,13 @@ void requestRedraw() {
 }
 
 void centerTextSafe(const String &s, int y, const uint8_t *font) {
-  u8g2.setFont(font);
-  int w = u8g2.getUTF8Width(s.c_str());
-  int x = (128 - w) / 2;
+  tftText.setFont(font);
+  tftText.setForegroundColor(TftUiTheme::FG);
+  int w = tftText.getUTF8Width(s.c_str());
+  int x = (TftUiTheme::WIDTH - w) / 2;
   if (x < 0) x = 0;
-  u8g2.setCursor(x, y);
-  u8g2.print(s);
+  tftText.setCursor(x, y);
+  tftText.print(s);
 }
 
 void centerText(const String &s, int y, const uint8_t *font) {

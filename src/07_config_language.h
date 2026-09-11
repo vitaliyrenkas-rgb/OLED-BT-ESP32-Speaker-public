@@ -3,24 +3,27 @@
 
 // ================= CONFIG / LANGUAGE =================
 void drawLanguageSelectScreen() {
-  u8g2.clearBuffer();
-  u8g2.drawFrame(5, 8, 118, 48);
+  tft.fillScreen(TftUiTheme::BG);
+  tft.drawRect(5, 14, 150, 96, TftUiTheme::FG);
 
-  centerText("Select Language", 24, u8g2_font_6x10_tr);
+  centerText("Select Language", 43, u8g2_font_7x14B_tf);
 
   // FIX v2.12:
   // Use ASCII "UA" here because some Cyrillic fonts render "Укр." as a dot on this build.
   // Button 1 = left bottom option, button 3 = right bottom option.
-  u8g2.setFont(u8g2_font_6x10_tr);
+  tftText.setFont(u8g2_font_7x14_tf);
+  tftText.setForegroundColor(TftUiTheme::FG);
 
-  u8g2.drawStr(12, 51, "En");
+  tftText.setCursor(17, 94);
+  tftText.print("En");
 
-  int buildW = u8g2.getStrWidth(BUILD_VERSION);
-  u8g2.drawStr((128 - buildW) / 2, 51, BUILD_VERSION);
+  int buildW = tftText.getUTF8Width(BUILD_VERSION);
+  tftText.setCursor((TftUiTheme::WIDTH - buildW) / 2, 94);
+  tftText.print(BUILD_VERSION);
 
-  u8g2.drawStr(100, 51, "UA");
-
-  u8g2.sendBuffer();
+  tftText.setCursor(126, 94);
+  tftText.print("UA");
+  tftUi.invalidate();
 }
 
 bool checkConfigResetAtBoot() {
@@ -29,19 +32,19 @@ bool checkConfigResetAtBoot() {
 }
 
 void showLanguageSavedScreen() {
-  u8g2.clearBuffer();
-  u8g2.drawFrame(8, 12, 112, 40);
-  if (uiLang == LANG_UA) centerText("UA saved", 35, u8g2_font_6x10_tr);
-  else centerText("EN saved", 35, u8g2_font_6x10_tr);
-  u8g2.sendBuffer();
+  tft.fillScreen(TftUiTheme::BG);
+  tft.drawRect(12, 29, 136, 70, TftUiTheme::FG);
+  if (uiLang == LANG_UA) centerText("UA saved", 70, u8g2_font_7x14_tf);
+  else centerText("EN saved", 70, u8g2_font_7x14_tf);
+  tftUi.invalidate();
   delay(650);
 }
 
 void showLanguageUnchangedScreen() {
-  u8g2.clearBuffer();
-  u8g2.drawFrame(8, 12, 112, 40);
-  centerText("No change", 35, u8g2_font_6x10_tr);
-  u8g2.sendBuffer();
+  tft.fillScreen(TftUiTheme::BG);
+  tft.drawRect(12, 29, 136, 70, TftUiTheme::FG);
+  centerText("No change", 70, u8g2_font_7x14_tf);
+  tftUi.invalidate();
   delay(650);
 }
 

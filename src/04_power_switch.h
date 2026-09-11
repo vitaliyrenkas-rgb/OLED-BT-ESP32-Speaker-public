@@ -37,11 +37,11 @@ void enterPowerOffDeepSleep(bool oledReady) {
   // Never enter deep sleep without a working wake source.
   if (!preparePowerSwitchWakeup()) return;
 
-  Serial.println("SW1 OFF: OLED off, entering deep sleep");
+  Serial.println("SW1 OFF: TFT cleared, entering deep sleep");
 
   if (oledReady) {
-    // Activate the SSD1309 controller's power-save mode before ESP32 sleeps.
-    u8g2.setPowerSave(1);
+    // The TFT backlight is not GPIO-controlled; clear the panel before sleep.
+    tft.fillScreen(TftUiTheme::BG);
     delay(30);
   }
 

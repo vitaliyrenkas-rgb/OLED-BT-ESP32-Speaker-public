@@ -307,12 +307,12 @@ void handleConfigPortalNotFound() {
 }
 
 void drawConfigPortalScreen(const char* statusLine) {
-  u8g2.clearBuffer();
-  u8g2.drawFrame(5, 6, 118, 52);
-  centerText("OLEG-SETUP", 22, u8g2_font_6x10_tr);
-  centerText("192.168.4.1", 36, u8g2_font_6x10_tr);
-  centerText(statusLine, 50, u8g2_font_5x8_tr);
-  u8g2.sendBuffer();
+  tft.fillScreen(TftUiTheme::BG);
+  tft.drawRect(5, 10, 150, 108, TftUiTheme::FG);
+  centerText("OLEG-SETUP", 39, u8g2_font_7x14B_tf);
+  centerText("192.168.4.1", 68, u8g2_font_7x14_tf);
+  centerText(statusLine, 96, u8g2_font_6x12_tf);
+  tftUi.invalidate();
 }
 
 bool startConfigPortal(const char* reason) {

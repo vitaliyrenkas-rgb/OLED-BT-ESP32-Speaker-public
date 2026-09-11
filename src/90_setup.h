@@ -19,8 +19,7 @@ void setup() {
   analogSetPinAttenuation(ADKEY_ADC_PIN, ADC_11db);
   updateBattery();
 
-  u8g2.begin();
-  u8g2.enableUTF8Print();
+  setupDisplay();
 
   setupButtons();
   Serial.println("OLEG 4 Sister: ADKEY buttons on GPIO35");
