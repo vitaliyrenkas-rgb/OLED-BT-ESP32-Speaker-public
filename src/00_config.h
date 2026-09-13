@@ -1,4 +1,4 @@
-// Auto-split from monolithic OLEG sketch.
+// Auto-split from monolithic OLED sketch.
 // Keep behavioral changes out of this structural split unless explicitly noted.
 
 // ================= CONFIG =================
@@ -9,11 +9,11 @@ const char* WEATHER_API_KEY = "Your Weather Key";
 const char* WEATHER_CITY = "Your_City";
 const char* WEATHER_COUNTRY = "Your_Country";
 
-const char* TZ_INFO = "EET-2EEST,M3.5.0/3,M10.5.0/4";
+const char* TZ_INFO = "MST7MDT,M3.2.0/2,M11.1.0/2";
 
 const uint32_t CONFIG_VERSION = 2;  // USA Gift: force fresh EN language config
 
-const char* BUILD_VERSION = "4.0-010";
+const char* BUILD_VERSION = "4.0-011";
 
 const unsigned long WEATHER_UPDATE_INTERVAL = 1UL * 60UL * 60UL * 1000UL;
 const unsigned long SLEEP_SCREEN_IDLE_MS = 5UL * 60UL * 1000UL;

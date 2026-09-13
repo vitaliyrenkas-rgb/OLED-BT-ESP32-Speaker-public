@@ -15,7 +15,7 @@ void drawTopBar() {
   u8g2.setFont(u8g2_font_5x8_tr);
   u8g2.setCursor(80, 9);
   u8g2.print(String((int)weatherTemp));
-  u8g2.print("C");
+  u8g2.print("F");
 
   drawBatteryIconCompact(104, 2);
   u8g2.drawHLine(0, 12, 128);

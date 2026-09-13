@@ -6,11 +6,11 @@ void setup() {
   Serial.begin(115200);
 
    // HU-055 USA Gift Build:
-  // TEMPORARY: SW1/deep-sleep handling disabled for transparent OLED bring-up.
-  // setupPowerSwitchSense();
-  // handlePowerSwitchAtBoot();
-  // Serial.printf("OLEG 4 Sister: SW1 sense on GPIO%d, level=%d\n",
-  //               SW1_SENSE_PIN, digitalRead(SW1_SENSE_PIN));
+  // TEMPORARY: SW1/deep-sleep handling disabled for transparent OLED bring-up.(ENABLED)
+  setupPowerSwitchSense();
+  handlePowerSwitchAtBoot();
+  Serial.printf("OLEG 4 Sister: SW1 sense on GPIO%d, level=%d\n",
+                SW1_SENSE_PIN, digitalRead(SW1_SENSE_PIN));
 
   analogReadResolution(12);
   analogSetPinAttenuation(BATTERY_ADC_PIN, ADC_11db);

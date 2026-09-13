@@ -6,8 +6,8 @@ void loop() {
   // Must run before the Config Portal early-return so SW1 can always put the
   // speaker to sleep, including while OLEG-SETUP is active.
   // HU-055 USA Gift Build:
-  // TEMPORARY: deep sleep disabled during OLED bring-up.
-  // handlePowerSwitchRuntime();
+  // TEMPORARY: deep sleep disabled during OLED bring-up.(ENABLED)
+  handlePowerSwitchRuntime();
   
   if (configPortalActive) {
     handleConfigPortal();

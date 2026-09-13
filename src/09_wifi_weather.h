@@ -1,4 +1,4 @@
-// Auto-split from monolithic OLEG sketch.
+// Auto-split from monolithic OLED sketch.
 // Keep behavioral changes out of this structural split unless explicitly noted.
 
 // ================= WIFI / TIME / WEATHER =================
@@ -81,7 +81,7 @@ void updateWeatherFromAPI() {
   String url = "http://api.openweathermap.org/data/2.5/weather?q=" +
                weatherQuery +
                "&appid=" + weatherApiKey +
-               "&units=metric&lang=ua";
+               "&units=imperial&lang=en";
 
   http.begin(url);
   int httpCode = http.GET();
@@ -141,7 +141,7 @@ void updateWeatherCycle() {
 
 // ================= CONFIG PORTAL =================
 // v3.5-009: AP/local web UI only. Do not keep Wi-Fi active during A2DP audio.
-const char* CONFIG_PORTAL_AP_SSID = "OLEG-SETUP";
+const char* CONFIG_PORTAL_AP_SSID = "OLED-SETUP";
 const char* CONFIG_PORTAL_URL = "http://192.168.4.1";
 const unsigned long CONFIG_PORTAL_BOOT_HOLD_MS = 7000UL;
 
@@ -212,14 +212,14 @@ String buildConfigPortalPage(const String& notice = "") {
 
   html += F("<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">");
   html += F("<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">");
-  html += F("<title>OLEG Config Portal</title>");
+  html += F("<title>OLED Config Portal</title>");
   html += F("<style>");
   html += F("body{margin:0;background:#111;color:#eee;font-family:Arial,sans-serif;}main{max-width:520px;margin:0 auto;padding:18px;}");
   html += F("h1{font-size:24px;margin:8px 0 4px}.card{background:#1d1d1d;border:1px solid #333;border-radius:14px;padding:16px;box-shadow:0 0 18px #0006}");
   html += F("label{display:block;margin:13px 0 5px;font-size:14px;color:#ccc}input{box-sizing:border-box;width:100%;margin-top:5px;padding:11px;border-radius:9px;border:1px solid #555;background:#090909;color:#fff;font-size:16px}");
   html += F("button{width:100%;margin-top:18px;padding:12px;border:0;border-radius:10px;background:#f5c542;color:#111;font-weight:700;font-size:16px}.hint{font-size:13px;color:#aaa;line-height:1.35}.ok{background:#173b25;border:1px solid #2d7a48;color:#b9f7c8;padding:10px;border-radius:9px}.info{display:inline-block;margin-left:6px;color:#f5c542;text-decoration:none;font-weight:700}.small{font-size:12px;color:#888}");
-  html += F("</style></head><body><main><h1>OLEG Config Portal</h1>");
-  html += F("<p class=\"hint\">AP: <b>OLEG-SETUP</b><br>URL: <b>http://192.168.4.1</b></p>");
+  html += F("</style></head><body><main><h1>OLED Config Portal</h1>");
+  html += F("<p class=\"hint\">AP: <b>OLED-SETUP</b><br>URL: <b>http://192.168.4.1</b></p>");
 
   if (notice.length() > 0) {
     html += "<p class=\"ok\">";
@@ -309,7 +309,7 @@ void handleConfigPortalNotFound() {
 void drawConfigPortalScreen(const char* statusLine) {
   u8g2.clearBuffer();
   u8g2.drawFrame(5, 6, 118, 52);
-  centerText("OLEG-SETUP", 22, u8g2_font_6x10_tr);
+  centerText("OLED-SETUP", 22, u8g2_font_6x10_tr);
   centerText("192.168.4.1", 36, u8g2_font_6x10_tr);
   centerText(statusLine, 50, u8g2_font_5x8_tr);
   u8g2.sendBuffer();

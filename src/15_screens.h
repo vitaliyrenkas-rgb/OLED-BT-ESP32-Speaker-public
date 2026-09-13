@@ -112,7 +112,7 @@ void drawWeatherScreen() {
   u8g2.print(String((int)weatherTemp));
 
   u8g2.setFont(u8g2_font_6x10_tr);
-  u8g2.drawStr(80, 27, "C");
+  u8g2.drawStr(80, 27, "F");
 
   // FIX v2.13:
   // Ukrainian "Відч." needs Cyrillic-capable font.
@@ -127,7 +127,7 @@ void drawWeatherScreen() {
   }
 
   u8g2.print(String((int)weatherFeels));
-  u8g2.print("C");
+  u8g2.print("F");
 
   // FIX v2.13:
   // Weather state label localized.
