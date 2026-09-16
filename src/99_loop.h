@@ -106,7 +106,7 @@ void loop() {
   // - forced redraw still happens immediately after button/metadata changes.
   unsigned long refreshRate = 1000;
   if (btConnected && currentScreen == SCREEN_PLAYER) refreshRate = 120; // FIX v2.9: smooth timer/EQ
-  if (currentScreen == SCREEN_CLOCK) refreshRate = 1000;
+  if (currentScreen == SCREEN_CLOCK) refreshRate = 500; // v5.0-RC1: blinking clock colon
   if (currentScreen == SCREEN_WEATHER) refreshRate = 1000;
   if (currentScreen == SCREEN_SLEEP) refreshRate = SLEEP_Z_ANIMATION_MS;
 

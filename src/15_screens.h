@@ -12,18 +12,54 @@ enum StandaloneTftScene : uint8_t {
 StandaloneTftScene activeStandaloneTftScene = TFT_STANDALONE_NONE;
 int lastStandaloneBatteryPercent = -1;
 
-String playerPrimaryLine() {
-  if (artist.length() > 0 && title.length() > 0) return artist + " - " + title;
+String playerTitleLine() {
   if (title.length() > 0) return title;
-  return artist;
+  return uiLang == LANG_UA ? "БЕЗ НАЗВИ" : "UNTITLED";
 }
 
-String playerSecondaryLine() {
-  if (album.length() > 0) return album;
-  return artist;
+String playerArtistLine() {
+  if (artist.length() > 0) return artist;
+  return album;
+}
+
+void loadTftCalendarStrings(String &weekday, String &fullDate) {
+  struct tm t;
+  if (!getLocalTime(&t, 5) || t.tm_year < (2024 - 1900)) {
+    weekday = uiLang == LANG_UA ? "ЧАС НЕ СИНХР." : "TIME NOT SYNC";
+    fullDate = "";
+    return;
+  }
+
+  if (uiLang == LANG_UA) {
+    static const char* DAYS[] = {
+      "НЕДІЛЯ", "ПОНЕДІЛОК", "ВІВТОРОК", "СЕРЕДА",
+      "ЧЕТВЕР", "П'ЯТНИЦЯ", "СУБОТА"
+    };
+    static const char* MONTHS[] = {
+      "СІЧНЯ", "ЛЮТОГО", "БЕРЕЗНЯ", "КВІТНЯ",
+      "ТРАВНЯ", "ЧЕРВНЯ", "ЛИПНЯ", "СЕРПНЯ",
+      "ВЕРЕСНЯ", "ЖОВТНЯ", "ЛИСТОПАДА", "ГРУДНЯ"
+    };
+    weekday = DAYS[t.tm_wday];
+    fullDate = String(t.tm_mday) + " " + MONTHS[t.tm_mon] + " " +
+               String(t.tm_year + 1900);
+  } else {
+    static const char* DAYS[] = {
+      "SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY",
+      "THURSDAY", "FRIDAY", "SATURDAY"
+    };
+    static const char* MONTHS[] = {
+      "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE",
+      "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"
+    };
+    weekday = DAYS[t.tm_wday];
+    fullDate = String(t.tm_mday) + " " + MONTHS[t.tm_mon] + " " +
+               String(t.tm_year + 1900);
+  }
 }
 
 void loadTftRuntimeModel() {
+  tftModel.ukrainian = uiLang == LANG_UA;
   tftModel.btConnected = btConnected;
   tftModel.wifiConnected = wifiLastSyncOk;
   tftModel.batteryPresent = batteryPresent;
@@ -32,12 +68,11 @@ void loadTftRuntimeModel() {
   tftModel.topTime = timeStr();
   tftModel.temperatureC = (int)weatherTemp;
   tftModel.duration = durationDisplayStr();
-  tftModel.title = playerPrimaryLine();
-  tftModel.artist = playerSecondaryLine();
+  tftModel.title = playerTitleLine();
+  tftModel.artist = playerArtistLine();
   tftModel.eqLevel = constrain(audioLevelToBricks(), 0, 7);
   tftModel.playbackActive = playbackActive;
-  tftModel.date = dateStr();
-  tftModel.date.toUpperCase();
+  loadTftCalendarStrings(tftModel.weekday, tftModel.date);
   tftModel.weatherState = weatherState;
   tftModel.weatherNight = weatherIsNight;
   tftModel.weatherFeelsC = (int)weatherFeels;
