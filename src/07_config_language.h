@@ -1,5 +1,4 @@
-// Auto-split from monolithic OLEG sketch.
-// Keep behavioral changes out of this structural split unless explicitly noted.
+// RT-003 v5.0 language and persistent configuration.
 
 // ================= CONFIG / LANGUAGE =================
 void drawLanguageSelectScreen() {
@@ -27,7 +26,7 @@ void drawLanguageSelectScreen() {
 }
 
 bool checkConfigResetAtBoot() {
-  // OLEG 4.0 Sister: no boot-time config reset combo on ADKEY.
+  // RT-003 v5.0: no boot-time config reset combo on ADKEY.
   return false;
 }
 
@@ -213,8 +212,9 @@ void setSpeakerConfigDefaults() {
   speakerConfig.weatherApiKey = WEATHER_API_KEY;
   speakerConfig.weatherLocation = defaultWeatherLocation();
   splitWeatherLocation(speakerConfig.weatherLocation, speakerConfig.weatherCity, speakerConfig.weatherCountry);
-  speakerConfig.btDeviceName = "Vitalik Speaker LoLin PROD";
-  speakerConfig.welcomeText = "Віталік! :)";
+  speakerConfig.btDeviceName = "RT-003 v5.0";
+  speakerConfig.welcomeLine1 = "Привіт,";
+  speakerConfig.welcomeLine2 = "Віталік! :)";
   speakerConfig.portalUser = "BTAdmin";
   speakerConfig.portalPass = "BTPassword";
   speakerConfig.loadedFromNvs = false;
@@ -224,8 +224,9 @@ void normalizeSpeakerConfig() {
   if (speakerConfig.wifiSsid.length() == 0) speakerConfig.wifiSsid = WIFI_SSID;
   if (speakerConfig.weatherApiKey.length() == 0) speakerConfig.weatherApiKey = WEATHER_API_KEY;
   if (speakerConfig.weatherLocation.length() == 0) speakerConfig.weatherLocation = defaultWeatherLocation();
-  if (speakerConfig.btDeviceName.length() == 0) speakerConfig.btDeviceName = "Vitalik Speaker LoLin PROD";
-  if (speakerConfig.welcomeText.length() == 0) speakerConfig.welcomeText = "Віталік! :)";
+  if (speakerConfig.btDeviceName.length() == 0) speakerConfig.btDeviceName = "RT-003 v5.0";
+  if (speakerConfig.welcomeLine1.length() == 0) speakerConfig.welcomeLine1 = "Привіт,";
+  if (speakerConfig.welcomeLine2.length() == 0) speakerConfig.welcomeLine2 = "Віталік! :)";
   if (speakerConfig.portalUser.length() == 0) speakerConfig.portalUser = "BTAdmin";
   if (speakerConfig.portalPass.length() == 0) speakerConfig.portalPass = "BTPassword";
 
@@ -249,7 +250,9 @@ bool loadSpeakerConfig() {
     speakerConfig.weatherApiKey = cfgPrefs.getString("weatherKey", speakerConfig.weatherApiKey);
     speakerConfig.weatherLocation = cfgPrefs.getString("weatherLoc", speakerConfig.weatherLocation);
     speakerConfig.btDeviceName = cfgPrefs.getString("btName", speakerConfig.btDeviceName);
-    speakerConfig.welcomeText = cfgPrefs.getString("welcome", speakerConfig.welcomeText);
+    String legacyWelcome = cfgPrefs.getString("welcome", speakerConfig.welcomeLine2);
+    speakerConfig.welcomeLine1 = cfgPrefs.getString("welcome1", speakerConfig.welcomeLine1);
+    speakerConfig.welcomeLine2 = cfgPrefs.getString("welcome2", legacyWelcome);
     speakerConfig.portalUser = cfgPrefs.getString("portalUser", speakerConfig.portalUser);
     speakerConfig.portalPass = cfgPrefs.getString("portalPass", speakerConfig.portalPass);
     speakerConfig.loadedFromNvs = true;
@@ -282,7 +285,8 @@ bool saveSpeakerConfig() {
   cfgPrefs.putString("weatherKey", speakerConfig.weatherApiKey);
   cfgPrefs.putString("weatherLoc", speakerConfig.weatherLocation);
   cfgPrefs.putString("btName", speakerConfig.btDeviceName);
-  cfgPrefs.putString("welcome", speakerConfig.welcomeText);
+  cfgPrefs.putString("welcome1", speakerConfig.welcomeLine1);
+  cfgPrefs.putString("welcome2", speakerConfig.welcomeLine2);
   cfgPrefs.putString("portalUser", speakerConfig.portalUser);
   cfgPrefs.putString("portalPass", speakerConfig.portalPass);
   cfgPrefs.end();

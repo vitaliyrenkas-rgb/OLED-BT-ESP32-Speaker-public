@@ -1,5 +1,4 @@
-// Auto-split from monolithic OLEG sketch.
-// Keep behavioral changes out of this structural split unless explicitly noted.
+// RT-003 v5.0 Bluetooth callbacks.
 
 // ================= CALLBACKS =================
 void avrc_metadata_callback(uint8_t id, const uint8_t *text) {
@@ -57,6 +56,7 @@ void avrc_connection_state_callback(bool connected) {
     playbackActive = false;
     trackTimerRunning = false;
     pcmLevelRaw = 0;
+    for (uint8_t band = 0; band < 4; ++band) pcmEqBands[band] = 0;
     titleOffset = 0;
     artistOffset = 0;
     btAutoSwitchedToPlayer = false;

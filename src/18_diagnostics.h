@@ -1,5 +1,4 @@
-// Auto-split from monolithic OLEG sketch.
-// Keep behavioral changes out of this structural split unless explicitly noted.
+// RT-003 v5.0 diagnostics.
 
 // ================= DIAGNOSTICS =================
 void logHeapDiagnostics() {

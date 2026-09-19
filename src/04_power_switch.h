@@ -1,5 +1,5 @@
-// OLEG 4.0 Sister: use the stock HU-055 SW1 as a power-state signal.
-// External divider: switched MH-M18 VCC -> 91k -> GPIO27 -> 120k -> Lolita GND.
+// RT-003 v5.0: use the stock HU-055 SW1 as a power-state signal.
+// External divider: switched MH-M18 VCC -> 100k -> GPIO27 -> 100k -> Lolita GND.
 // SW1 OFF is LOW; SW1 ON is HIGH. GPIO27 is RTC-capable on classic ESP32.
 
 #include "esp_sleep.h"
@@ -17,7 +17,7 @@ void setupPowerSwitchSense() {
   // before digitalRead() after a deep-sleep wake.
   rtc_gpio_deinit(GPIO_NUM_27);
 
-  // The external 120k resistor provides the pull-down. Do not enable an
+  // The external 100k resistor provides the pull-down. Do not enable an
   // internal pull-up or pull-down: it would alter the divider voltage.
   pinMode(SW1_SENSE_PIN, INPUT);
 }
@@ -33,17 +33,19 @@ bool preparePowerSwitchWakeup() {
   return true;
 }
 
-void enterPowerOffDeepSleep(bool oledReady) {
+void enterPowerOffDeepSleep(bool displayReady) {
   // Never enter deep sleep without a working wake source.
   if (!preparePowerSwitchWakeup()) return;
 
   Serial.println("SW1 OFF: TFT cleared, entering deep sleep");
 
-  if (oledReady) {
-    // The TFT backlight is not GPIO-controlled; clear the panel before sleep.
+  if (displayReady) {
     tft.fillScreen(TftUiTheme::BG);
     delay(30);
   }
+
+  setTftBacklight(false);
+  delay(10);
 
   esp_deep_sleep_start();
 }
@@ -52,7 +54,7 @@ void handlePowerSwitchAtBoot() {
   if (digitalRead(SW1_SENSE_PIN) == HIGH) return;
 
   // If the speaker is booted/reset while SW1 is OFF, avoid bringing up the
-  // OLED, Wi-Fi, Bluetooth and I2S. Require a stable LOW first.
+  // TFT, Wi-Fi, Bluetooth and I2S. Require a stable LOW first.
   const unsigned long lowStartedMs = millis();
   while (digitalRead(SW1_SENSE_PIN) == LOW) {
     if (millis() - lowStartedMs >= SW1_OFF_STABLE_MS) {

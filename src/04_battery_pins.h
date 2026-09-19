@@ -1,5 +1,4 @@
-// Auto-split from monolithic OLEG sketch.
-// Keep behavioral changes out of this structural split unless explicitly noted.
+// RT-003 v5.0 battery and analog pin map.
 
 // ================= BATTERY ADC =================
 // Post-calibration UI calibration for the actual assembled speaker.
@@ -20,7 +19,7 @@ const float BATTERY_FILTER_FAST_DELTA = 0.18;
 
 
 // ================= VOLUME POT ADC =================
-// OLEG 4.0 Sister keeps the HU-055 stock analog volume knob in the amplifier path.
+// RT-003 v5.0 keeps the HU-055 stock analog volume knob in the amplifier path.
 const bool VOLUME_POT_ENABLED = false;
 const unsigned long VOLUME_POT_UPDATE_INTERVAL = 150UL;
 const int VOLUME_POT_MIN_VOLUME = 0;

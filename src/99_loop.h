@@ -1,10 +1,9 @@
-// Auto-split from monolithic OLEG sketch.
-// Keep behavioral changes out of this structural split unless explicitly noted.
+// RT-003 v5.0 main loop.
 
 // ================= LOOP =================
 void loop() {
   // Must run before the Config Portal early-return so SW1 can always put the
-  // speaker to sleep, including while OLEG-SETUP is active.
+  // speaker to sleep, including while RT-003-SETUP is active.
   handlePowerSwitchRuntime();
 
   if (configPortalActive) {
@@ -23,7 +22,7 @@ void loop() {
   // No background Wi-Fi here.
   // It caused A2DP stutter in previous builds.
   handleConfigResetButton();
-#if OLEG4_DEBUG_ADKEY
+#if RT003_DEBUG_ADKEY
   logAdkeyCalibration();
 #endif
   handleButtons();
@@ -37,7 +36,7 @@ void loop() {
   // FIX v3.0:
   // If Bluetooth is connected and music is playing, but user left UI on Clock/Weather,
   // return to Player after 1 minute of no button activity.
-  // OLEG v3.5-003:
+  // RT-003 inherited behavior:
   // Weather is a quick-look screen: if BT is connected, return to Player after 1 minute
   // even if playback is paused. Clock keeps the older playback-active behavior.
   bool autoReturnFromClock = btConnected && playbackActive && currentScreen == SCREEN_CLOCK;
@@ -102,11 +101,11 @@ void loop() {
   }
 
   // Redraw throttle:
-  // - Player with BT: slower, to reduce I2C/OLED pressure during A2DP.
+  // - Player with BT: faster, while retaining the stable A2DP runtime.
   // - forced redraw still happens immediately after button/metadata changes.
   unsigned long refreshRate = 1000;
   if (btConnected && currentScreen == SCREEN_PLAYER) refreshRate = 120; // FIX v2.9: smooth timer/EQ
-  if (currentScreen == SCREEN_CLOCK) refreshRate = 500; // v5.0-RC1: blinking clock colon
+  if (currentScreen == SCREEN_CLOCK) refreshRate = 500; // blinking clock colon
   if (currentScreen == SCREEN_WEATHER) refreshRate = 1000;
   if (currentScreen == SCREEN_SLEEP) refreshRate = SLEEP_Z_ANIMATION_MS;
 

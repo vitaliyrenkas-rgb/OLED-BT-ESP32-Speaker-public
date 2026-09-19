@@ -65,16 +65,47 @@ void loadTftRuntimeModel() {
   tftModel.batteryPresent = batteryPresent;
   tftModel.batteryCharging = batteryCharging;
   tftModel.batteryPercent = constrain(batteryPercent, 0, 100);
+  tftModel.batteryIconPercent = getBatteryIconPercent();
   tftModel.topTime = timeStr();
   tftModel.temperatureC = (int)weatherTemp;
   tftModel.duration = durationDisplayStr();
   tftModel.title = playerTitleLine();
   tftModel.artist = playerArtistLine();
-  tftModel.eqLevel = constrain(audioLevelToBricks(), 0, 7);
+  for (uint8_t band = 0; band < 4; ++band) {
+    const uint8_t rows = pcmEqBands[band];
+    tftModel.eqBands[band] = playbackActive
+      ? constrain(rows, 0, 12)
+      : 0;
+  }
   tftModel.playbackActive = playbackActive;
   loadTftCalendarStrings(tftModel.weekday, tftModel.date);
   tftModel.weatherState = weatherState;
   tftModel.weatherNight = weatherIsNight;
+  if (weatherIconPreviewIndex >= 0) {
+    switch (weatherIconPreviewIndex) {
+      case 0:
+        tftModel.weatherState = "SUN";
+        tftModel.weatherNight = false;
+        break;
+      case 1:
+        tftModel.weatherState = "SUN";
+        tftModel.weatherNight = true;
+        break;
+      case 2:
+        tftModel.weatherState = "CLOUD";
+        tftModel.weatherNight = false;
+        break;
+      case 3:
+        tftModel.weatherState = "RAIN";
+        tftModel.weatherNight = false;
+        break;
+      case 4:
+      default:
+        tftModel.weatherState = "SNOW";
+        tftModel.weatherNight = false;
+        break;
+    }
+  }
   tftModel.weatherFeelsC = (int)weatherFeels;
   tftModel.humidity = weatherHumidity;
   tftModel.volumePercent = constrain(volumeOverlayPercent, 0, 100);
@@ -99,8 +130,8 @@ void drawGreetingScreen() {
   if (!beginStandaloneTftScreen(TFT_STANDALONE_GREETING)) return;
   tft.drawRect(8, 18, 144, 92, TftUiTheme::FG);
   tft.drawRect(10, 20, 140, 88, TftUiTheme::DIM);
-  centerText("Welcome", 48, u8g2_font_7x14B_tf);
-  centerText(speakerConfig.welcomeText, 76, u8g2_font_7x14_tf);
+  centerText(speakerConfig.welcomeLine1, 48, u8g2_font_6x12_t_cyrillic);
+  centerText(speakerConfig.welcomeLine2, 76, u8g2_font_6x12_t_cyrillic);
   centerText(BUILD_VERSION, 99, u8g2_font_5x8_tf);
 }
 
@@ -108,7 +139,8 @@ void drawMessageScreen() {
   if (!beginStandaloneTftScreen(TFT_STANDALONE_MESSAGE)) return;
   tft.drawRect(8, 18, 144, 92, TftUiTheme::FG);
   centerText("Bluetooth", 52, u8g2_font_7x14B_tf);
-  centerText("is not connected", 78, u8g2_font_6x12_tf);
+  centerText(uiLang == LANG_UA ? "не підключено" : "is not connected", 78,
+             u8g2_font_6x12_t_cyrillic);
 }
 
 void drawLowBatteryOverlayScreen() {
@@ -118,7 +150,9 @@ void drawLowBatteryOverlayScreen() {
   if (entered) {
     tft.drawRect(3, 3, 154, 122, TftUiTheme::RED);
     tft.drawRect(5, 5, 150, 118, TftUiTheme::DIM);
-    centerText("LOW BATTERY", 34, u8g2_font_7x14B_tf);
+    centerText(uiLang == LANG_UA ? "НИЗЬКИЙ ЗАРЯД" : "LOW BATTERY", 34,
+               uiLang == LANG_UA ? u8g2_font_6x12_t_cyrillic
+                                 : u8g2_font_7x14B_tf);
     tft.drawFastHLine(13, 42, 134, TftUiTheme::RED);
   }
 

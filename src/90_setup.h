@@ -1,13 +1,13 @@
-// Auto-split from monolithic OLEG sketch.
-// Keep behavioral changes out of this structural split unless explicitly noted.
+// RT-003 v5.0 setup.
 
 // ================= SETUP =================
 void setup() {
   Serial.begin(115200);
 
+  setTftBacklight(false);
   setupPowerSwitchSense();
   handlePowerSwitchAtBoot();
-  Serial.printf("OLEG 4 Sister: SW1 sense on GPIO%d, level=%d\n",
+  Serial.printf("RT-003 v5.0: SW1 sense on GPIO%d, level=%d\n",
                 SW1_SENSE_PIN, digitalRead(SW1_SENSE_PIN));
 
   analogReadResolution(12);
@@ -22,9 +22,9 @@ void setup() {
   setupDisplay();
 
   setupButtons();
-  Serial.println("OLEG 4 Sister: ADKEY buttons on GPIO35");
+  Serial.println("RT-003 v5.0: ADKEY buttons on GPIO35");
   Serial.println("Runtime: hold BTN1 for 7s to toggle language");
-  Serial.println("Boot: hold BTN2 for 7s for OLEG-SETUP");
+  Serial.println("Boot: hold BTN2 for 7s for RT-003-SETUP");
   loadOrSelectLanguage();
   loadSpeakerConfig();
 

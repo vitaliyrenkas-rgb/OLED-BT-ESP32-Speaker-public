@@ -19,12 +19,13 @@ struct Model {
   bool batteryPresent = true;
   bool batteryCharging = false;
   int batteryPercent = 82;
+  int batteryIconPercent = 82;
   String topTime = "23:47";
   int temperatureC = 21;
   String duration = "02:36";
   String title = "Enjoy the Silence";
   String artist = "Depeche Mode";
-  uint8_t eqLevel = 5;
+  uint8_t eqBands[4] = {8, 5, 10, 6};
   bool playbackActive = true;
   String weekday = "СЕРЕДА";
   String date = "16 ВЕРЕСНЯ 2026";
@@ -54,7 +55,15 @@ public:
   }
 
   void draw(const Model &m) {
-    const bool sceneChanged = !_sceneValid || m.screen != _scene;
+    const bool enteringPlayer = m.screen == PLAYER &&
+                                (!_sceneValid || _scene != PLAYER);
+    const bool titleChanged = !_cacheValid || m.title != _cache.title;
+    if (m.screen == PLAYER && (enteringPlayer || titleChanged)) {
+      _titleMarqueeStartedAtMs = m.nowMs;
+    }
+
+    const bool localeChanged = _cacheValid && m.ukrainian != _cache.ukrainian;
+    const bool sceneChanged = !_sceneValid || m.screen != _scene || localeChanged;
     if (sceneChanged) {
       drawSceneBackground(m.screen);
       drawFullScene(m);
@@ -84,6 +93,7 @@ private:
   bool _sceneValid = false;
   bool _cacheValid = false;
   Model _cache;
+  uint32_t _titleMarqueeStartedAtMs = 0;
 
   void font(const uint8_t *f, uint16_t color = TftUiTheme::FG) {
     _text.setFont(f);
@@ -244,11 +254,22 @@ private:
   void drawTopBar(const Model &m) {
     drawBtIcon(3, 4, m.btConnected);
     drawWifiIcon(15, 2, m.wifiConnected);
-    centerText(12, m.topTime, u8g2_font_5x8_tf, TftUiTheme::FG, 32, 80);
-    textAt(82, 12, String(m.temperatureC) + "C", u8g2_font_5x8_tf,
-           TftUiTheme::ORANGE);
-    drawBatteryStatus(105, 4, m);
+    drawTopBarCenter(m);
+    drawBatteryStatus(116, 4, m);
     _gfx.drawFastHLine(0, 17, 160, TftUiTheme::LINE);
+  }
+
+  void drawTopBarCenter(const Model &m) {
+    const String temperature = String(m.temperatureC) + "C";
+    font(u8g2_font_5x8_tf, TftUiTheme::FG);
+    const int16_t timeW = _text.getUTF8Width(m.topTime.c_str());
+    const int16_t temperatureW = _text.getUTF8Width(temperature.c_str());
+    constexpr int16_t gap = 4;
+    const int16_t startX = (TftUiTheme::WIDTH - timeW - gap - temperatureW) / 2;
+
+    textAt(startX, 12, m.topTime, u8g2_font_5x8_tf, TftUiTheme::FG);
+    textAt(startX + timeW + gap, 12, temperature,
+           u8g2_font_5x8_tf, TftUiTheme::ORANGE);
   }
 
   void updateTopBarDirty(const Model &m) {
@@ -261,39 +282,61 @@ private:
       clearRect(13, 1, 17, 15);
       drawWifiIcon(15, 2, m.wifiConnected);
     }
-    if (m.topTime != _cache.topTime) {
-      clearRect(31, 1, 50, 15);
-      centerText(12, m.topTime, u8g2_font_5x8_tf, TftUiTheme::FG, 32, 80);
-    }
-    if (m.temperatureC != _cache.temperatureC) {
-      clearRect(81, 1, 23, 15);
-      textAt(82, 12, String(m.temperatureC) + "C", u8g2_font_5x8_tf,
-             TftUiTheme::ORANGE);
+    if (m.topTime != _cache.topTime ||
+        m.temperatureC != _cache.temperatureC) {
+      clearRect(31, 1, 81, 15);
+      drawTopBarCenter(m);
     }
     if (m.batteryPresent != _cache.batteryPresent ||
         m.batteryCharging != _cache.batteryCharging ||
-        m.batteryPercent != _cache.batteryPercent) {
-      clearRect(104, 1, 56, 15);
-      drawBatteryStatus(105, 4, m);
+        m.batteryPercent != _cache.batteryPercent ||
+        m.batteryIconPercent != _cache.batteryIconPercent) {
+      clearRect(112, 1, 48, 15);
+      drawBatteryStatus(116, 4, m);
     }
   }
 
-  void drawNavBar(Screen active) {
+  void drawNavBar(const Model &m) {
     _gfx.drawFastHLine(1, 108, 158, TftUiTheme::LINE);
-    drawNavItem(0, 53, "Player", active == PLAYER);
-    drawNavItem(54, 52, "Clock", active == CLOCK);
-    drawNavItem(107, 53, "Weather", active == WEATHER);
+    drawNavItem(0, 53, m.ukrainian ? "Плеєр" : "Player",
+                m.screen == PLAYER);
+    drawNavItem(54, 52, m.ukrainian ? "Годинник" : "Clock",
+                m.screen == CLOCK);
+    drawNavItem(107, 53, m.ukrainian ? "Погода" : "Weather",
+                m.screen == WEATHER);
     _gfx.drawFastVLine(54, 111, 14, TftUiTheme::DIM);
     _gfx.drawFastVLine(106, 111, 14, TftUiTheme::DIM);
   }
 
   void drawNavItem(int16_t x, int16_t w, const char *label, bool active) {
-    if (active) {
-      _gfx.fillRect(x + 5, 111, w - 10, 14, TftUiTheme::FG);
-      centerText(123, label, u8g2_font_6x12_tf, TftUiTheme::BG, x, x + w);
-    } else {
-      centerText(123, label, u8g2_font_6x12_tf, TftUiTheme::FG, x, x + w);
+    constexpr int16_t topY = 110;
+    constexpr int16_t height = 17;
+    const uint16_t top = active ? TftUiTheme::NAV_ACTIVE_TOP
+                                : TftUiTheme::NAV_IDLE_TOP;
+    const uint16_t bottom = active ? TftUiTheme::NAV_ACTIVE_BOTTOM
+                                   : TftUiTheme::NAV_IDLE_BOTTOM;
+
+    for (int16_t row = 0; row < height; ++row) {
+      const uint16_t color = TftUiTheme::blend565(
+        top, bottom, row, height - 1);
+      _gfx.drawFastHLine(x + 2, topY + row, w - 4, color);
     }
+
+    if (active) {
+      _gfx.drawRect(x + 1, topY - 1, w - 2, height + 1,
+                    TftUiTheme::NAV_ACTIVE_BORDER);
+    }
+
+    // Keep navigation text transparent and bright over the button gradient.
+    // Do not use black/inverted glyphs here: they became square blocks on the
+    // physical display instead of a readable active label.
+    _text.setFontMode(1);
+    font(u8g2_font_5x8_t_cyrillic,
+         active ? TftUiTheme::FG : TftUiTheme::DIM);
+    const int16_t labelW = _text.getUTF8Width(label);
+    const int16_t labelX = x + (w - labelW) / 2;
+    _text.setCursor(labelX, 122);
+    _text.print(label);
   }
 
   void drawPlayerFull(const Model &m) {
@@ -301,7 +344,7 @@ private:
     drawPlayerDuration(m);
     drawPlayerEq(m);
     drawPlayerMetadata(m);
-    drawNavBar(PLAYER);
+    drawNavBar(m);
   }
 
   void drawPlayerDuration(const Model &m) {
@@ -309,16 +352,49 @@ private:
   }
 
   void drawPlayerEq(const Model &m) {
-    const uint8_t level = m.playbackActive ? constrain(m.eqLevel, 0, 7) : 0;
-    drawBrickEq(19, 75, level, false);
-    drawBrickEq(115, 75, level, true);
+    drawBrickEq(19, 75, m.eqBands, m.playbackActive, false);
+    drawBrickEq(115, 75, m.eqBands, m.playbackActive, true);
   }
 
   void drawPlayerMetadata(const Model &m) {
-    centerText(89, m.title, u8g2_font_6x12_t_cyrillic,
-               TftUiTheme::FG, 4, 156);
+    drawPlayerTitle(m);
     centerText(100, m.artist, u8g2_font_4x6_t_cyrillic,
                TftUiTheme::CYAN, 4, 156);
+  }
+
+  int16_t playerTitleWidth(const Model &m) {
+    font(u8g2_font_6x12_t_cyrillic, TftUiTheme::FG);
+    return _text.getUTF8Width(m.title.c_str());
+  }
+
+  int16_t playerTitleMarqueeOffset(const Model &m, int16_t titleW) const {
+    constexpr int16_t availableW = 152;
+    constexpr int16_t gap = 18;
+    constexpr uint32_t initialHoldMs = 900UL;
+    constexpr uint32_t pixelStepMs = 80UL;
+    if (titleW <= availableW) return 0;
+
+    const uint32_t elapsed = m.nowMs - _titleMarqueeStartedAtMs;
+    if (elapsed < initialHoldMs) return 0;
+    return ((elapsed - initialHoldMs) / pixelStepMs) % (titleW + gap);
+  }
+
+  void drawPlayerTitle(const Model &m) {
+    constexpr int16_t left = 4;
+    constexpr int16_t right = 156;
+    constexpr int16_t gap = 18;
+    const int16_t titleW = playerTitleWidth(m);
+    if (titleW <= right - left) {
+      centerText(89, m.title, u8g2_font_6x12_t_cyrillic,
+                 TftUiTheme::FG, left, right);
+      return;
+    }
+
+    const int16_t offset = playerTitleMarqueeOffset(m, titleW);
+    textAt(left - offset, 89, m.title,
+           u8g2_font_6x12_t_cyrillic, TftUiTheme::FG);
+    textAt(left - offset + titleW + gap, 89, m.title,
+           u8g2_font_6x12_t_cyrillic, TftUiTheme::FG);
   }
 
   void updatePlayerDirty(const Model &m) {
@@ -327,29 +403,38 @@ private:
       clearRect(47, 29, 66, 32);
       drawPlayerDuration(m);
     }
-    if (m.eqLevel != _cache.eqLevel || m.playbackActive != _cache.playbackActive) {
+    bool eqChanged = m.playbackActive != _cache.playbackActive;
+    for (uint8_t band = 0; band < 4 && !eqChanged; ++band) {
+      eqChanged = m.eqBands[band] != _cache.eqBands[band];
+    }
+    if (eqChanged) {
       clearRect(18, 27, 29, 49);
       clearRect(114, 27, 29, 49);
       drawPlayerEq(m);
     }
     if (m.title != _cache.title || m.artist != _cache.artist) {
-      clearRect(3, 76, 154, 30);
+      clearRect(0, 76, 160, 30);
       drawPlayerMetadata(m);
+    } else {
+      const int16_t titleW = playerTitleWidth(m);
+      if (playerTitleMarqueeOffset(m, titleW) !=
+          playerTitleMarqueeOffset(_cache, titleW)) {
+        clearRect(0, 77, 160, 14);
+        drawPlayerTitle(m);
+      }
     }
   }
 
-  void drawBrickEq(int16_t x0, int16_t baseY, uint8_t level, bool mirror) {
-    static const int8_t profile[4] = { -1, 2, 4, 1 };
+  void drawBrickEq(int16_t x0, int16_t baseY, const uint8_t levels[4],
+                   bool active, bool mirror) {
     constexpr int16_t brickW = 5;
     constexpr int16_t brickH = 3;
     constexpr int16_t gapX = 2;
     constexpr int16_t gapY = 1;
     constexpr int maxRows = 12;
-    const int baseRows = level == 0 ? 0 : map(level, 1, 7, 3, 10);
     for (uint8_t c = 0; c < 4; ++c) {
-      const uint8_t pc = mirror ? 3 - c : c;
-      const int rows = level == 0 ? 0
-                                  : constrain(baseRows + profile[pc], 0, maxRows);
+      const uint8_t band = mirror ? 3 - c : c;
+      const int rows = active ? constrain(levels[band], 0, maxRows) : 0;
       const int16_t x = x0 + c * (brickW + gapX);
       for (int r = 0; r < maxRows; ++r) {
         const int16_t y = baseY - brickH - r * (brickH + gapY);
@@ -364,7 +449,7 @@ private:
   void drawClockFull(const Model &m) {
     drawTopBar(m);
     drawClockBody(m);
-    drawNavBar(CLOCK);
+    drawNavBar(m);
   }
 
   bool clockColonOn(const Model &m) const {
@@ -402,7 +487,7 @@ private:
   void drawWeatherFull(const Model &m) {
     drawTopBar(m);
     drawWeatherBody(m);
-    drawNavBar(WEATHER);
+    drawNavBar(m);
   }
 
   void drawWeatherBody(const Model &m) {
@@ -420,8 +505,8 @@ private:
     const String humidity = m.humidity >= 0
       ? String(m.ukrainian ? "ВОЛОГІСТЬ " : "HUMIDITY ") + m.humidity + "%"
       : String(m.ukrainian ? "ВОЛОГІСТЬ --%" : "HUMIDITY --%");
-    centerText(102, humidity, u8g2_font_4x6_t_cyrillic,
-               TftUiTheme::DIM, 3, 157);
+    centerText(103, humidity, u8g2_font_6x12_t_cyrillic,
+               TftUiTheme::CYAN, 3, 157);
   }
 
   void updateWeatherDirty(const Model &m) {
@@ -462,7 +547,10 @@ private:
   void drawVolumeFull(const Model &m) {
     _gfx.drawRect(3, 3, 154, 122, TftUiTheme::FG);
     _gfx.drawRect(5, 5, 150, 118, TftUiTheme::DIM);
-    centerText(26, "Volume", u8g2_font_7x14B_tf, TftUiTheme::FG);
+    centerText(26, m.ukrainian ? "ГУЧНІСТЬ" : "Volume",
+               m.ukrainian ? u8g2_font_6x12_t_cyrillic
+                           : u8g2_font_7x14B_tf,
+               TftUiTheme::FG);
     _gfx.drawFastHLine(13, 31, 134, TftUiTheme::CYAN);
     drawVolumeValue(m.volumePercent);
   }
@@ -571,33 +659,45 @@ private:
     const uint16_t outline = (!m.batteryPresent || low)
       ? TftUiTheme::RED : TftUiTheme::FG;
     _gfx.drawRect(x, y, bodyW, bodyH, outline);
-    _gfx.fillRect(x + bodyW, y + 2, 2, 4, outline);
+    _gfx.fillRect(x - 2, y + 2, 2, 4, outline);
     if (m.batteryPresent) {
       if (!low) {
-        const int fill = map(constrain(m.batteryPercent, 0, 100), 0, 100, 0, 9);
+        const int iconPercent = constrain(m.batteryIconPercent, 0, 100);
+        const int fill = map(iconPercent, 0, 100, 0, 9);
         if (fill > 0) {
-          _gfx.fillRect(x + 2, y + 2, fill, 4,
-                        TftUiTheme::batteryColor(m.batteryPercent));
+          _gfx.fillRect(x + bodyW - 2 - fill, y + 2, fill, 4,
+                        TftUiTheme::batteryColor(iconPercent));
         }
       }
-      if (m.batteryCharging || low) {
-        const uint16_t bolt = m.batteryCharging
-          ? TftUiTheme::YELLOW : TftUiTheme::RED;
-        _gfx.drawLine(x + 8, y + 1, x + 5, y + 4, bolt);
-        _gfx.drawLine(x + 5, y + 4, x + 8, y + 4, bolt);
-        _gfx.drawLine(x + 8, y + 4, x + 6, y + 7, bolt);
+      if (low) {
+        _gfx.drawLine(x + 4, y + 1, x + 7, y + 4, TftUiTheme::RED);
+        _gfx.drawLine(x + 7, y + 4, x + 4, y + 4, TftUiTheme::RED);
+        _gfx.drawLine(x + 4, y + 4, x + 6, y + 7, TftUiTheme::RED);
       }
     } else {
-      _gfx.drawLine(x - 1, y + 8, x + 13, y - 1, TftUiTheme::RED);
-      _gfx.drawLine(x, y + 8, x + 14, y - 1, TftUiTheme::RED);
+      _gfx.drawLine(x + 13, y + 8, x - 1, y - 1, TftUiTheme::RED);
+      _gfx.drawLine(x + 12, y + 8, x - 2, y - 1, TftUiTheme::RED);
+    }
+    if (m.batteryPresent && m.batteryCharging) {
+      drawChargingPlug(x + 15, y);
     }
     const String percent = m.batteryPresent
       ? String(constrain(m.batteryPercent, 0, 100)) + "%" : "--%";
     font(u8g2_font_5x8_tf, (!m.batteryPresent || low)
                            ? TftUiTheme::RED : TftUiTheme::FG);
-    const int16_t width = _text.getUTF8Width(percent.c_str());
-    _text.setCursor(158 - width, 12);
+    _text.setCursor(x + 22, 12);
     _text.print(percent);
+  }
+
+  void drawChargingPlug(int16_t x, int16_t y) {
+    const uint16_t c = TftUiTheme::YELLOW;
+    _gfx.drawFastVLine(x + 1, y, 2, c);
+    _gfx.drawFastVLine(x + 3, y, 2, c);
+    _gfx.drawFastHLine(x, y + 2, 5, c);
+    _gfx.drawPixel(x, y + 3, c);
+    _gfx.drawPixel(x + 4, y + 3, c);
+    _gfx.drawFastHLine(x, y + 4, 5, c);
+    _gfx.drawFastVLine(x + 2, y + 5, 3, c);
   }
 
   void drawWeatherIcon(int16_t x, int16_t y, const String &state, bool night) {
@@ -606,17 +706,42 @@ private:
       else drawSun(x, y);
     } else if (state == "RAIN") {
       drawCloud(x, y);
-      for (int i = 0; i < 3; ++i)
-        _gfx.drawLine(x + 10 + i * 10, y + 29,
-                      x + 7 + i * 10, y + 35, TftUiTheme::CYAN);
+      drawRainDrop(x + 11, y + 32);
+      drawRainDrop(x + 23, y + 34);
+      drawRainDrop(x + 35, y + 32);
     } else if (state == "SNOW") {
       drawCloud(x, y);
-      for (int i = 0; i < 3; ++i)
-        _gfx.fillCircle(x + 9 + i * 11, y + 32 + (i & 1) * 2,
-                        1, TftUiTheme::FG);
+      drawSnowflake(x + 11, y + 35);
+      drawSnowflake(x + 23, y + 38);
+      drawSnowflake(x + 35, y + 35);
     } else {
       drawCloud(x, y);
     }
+  }
+
+  void drawRainDrop(int16_t x, int16_t y) {
+    _gfx.drawPixel(x, y, TftUiTheme::CYAN);
+    _gfx.drawFastHLine(x - 1, y + 1, 3, TftUiTheme::CYAN);
+    _gfx.drawFastHLine(x - 1, y + 2, 3, TftUiTheme::CYAN);
+    _gfx.drawFastHLine(x - 2, y + 3, 5, TftUiTheme::BLUE);
+    _gfx.drawFastHLine(x - 2, y + 4, 5, TftUiTheme::BLUE);
+    _gfx.drawPixel(x - 1, y + 3, TftUiTheme::CYAN);
+    _gfx.drawFastHLine(x - 1, y + 5, 3, TftUiTheme::BLUE);
+  }
+
+  void drawSnowflake(int16_t x, int16_t y) {
+    _gfx.drawFastHLine(x - 3, y, 7, TftUiTheme::FG);
+    _gfx.drawFastVLine(x, y - 3, 7, TftUiTheme::FG);
+    _gfx.drawLine(x - 2, y - 2, x + 2, y + 2, TftUiTheme::CYAN);
+    _gfx.drawLine(x + 2, y - 2, x - 2, y + 2, TftUiTheme::CYAN);
+    _gfx.drawPixel(x - 3, y - 1, TftUiTheme::BLUE);
+    _gfx.drawPixel(x - 3, y + 1, TftUiTheme::BLUE);
+    _gfx.drawPixel(x + 3, y - 1, TftUiTheme::BLUE);
+    _gfx.drawPixel(x + 3, y + 1, TftUiTheme::BLUE);
+    _gfx.drawPixel(x - 1, y - 3, TftUiTheme::BLUE);
+    _gfx.drawPixel(x + 1, y - 3, TftUiTheme::BLUE);
+    _gfx.drawPixel(x - 1, y + 3, TftUiTheme::BLUE);
+    _gfx.drawPixel(x + 1, y + 3, TftUiTheme::BLUE);
   }
 
   uint16_t gradientColorForY(int16_t localY, int16_t diameter,

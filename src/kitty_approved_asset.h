@@ -42,10 +42,10 @@ const uint16_t kittyApprovedPalette[295] PROGMEM = {
 };
 
 const char kittyApprovedPackedB64[] PROGMEM =
-#include "kitty_b64_0.inc"
-#include "kitty_b64_1.inc"
-#include "kitty_b64_2.inc"
-#include "kitty_b64_3.inc"
+#include "kitty_b64_0.h"
+#include "kitty_b64_1.h"
+#include "kitty_b64_2.h"
+#include "kitty_b64_3.h"
 ;
 
 inline int8_t kittyB64Value(char c) {
@@ -58,55 +58,50 @@ inline int8_t kittyB64Value(char c) {
 }
 
 inline bool decodeApprovedKitty(uint16_t *pixels) {
-  uint8_t *packed = static_cast<uint8_t *>(malloc(KITTY_PACKED_BYTES));
-  if (!packed) return false;
+  // Decode the packed stream directly into the static RGB565 framebuffer.
+  // The previous two-stage decoder temporarily malloc()'d 13.5 KB here.
+  // When SLEEP was first entered after Bluetooth/A2DP startup, that contiguous
+  // block was not guaranteed to exist and the approved kitty silently vanished.
+  size_t packedBytes = 0;
+  size_t pixelPos = 0;
+  uint32_t b64Buf = 0;
+  uint8_t b64Bits = 0;
+  uint32_t pixelBuf = 0;
+  uint8_t pixelBits = 0;
 
-  size_t outPos = 0;
-  uint32_t acc = 0;
-  uint8_t accBits = 0;
-
-  for (size_t i = 0; outPos < KITTY_PACKED_BYTES; ++i) {
+  for (size_t i = 0; ; ++i) {
     const char c = static_cast<char>(pgm_read_byte(&kittyApprovedPackedB64[i]));
     if (c == '\0' || c == '=') break;
     const int8_t v = kittyB64Value(c);
     if (v < 0) continue;
 
-    acc = (acc << 6) | static_cast<uint8_t>(v);
-    accBits += 6;
+    b64Buf = (b64Buf << 6) | static_cast<uint8_t>(v);
+    b64Bits += 6;
 
-    while (accBits >= 8 && outPos < KITTY_PACKED_BYTES) {
-      accBits -= 8;
-      packed[outPos++] = (acc >> accBits) & 0xFF;
-      if (accBits == 0) acc = 0;
-      else acc &= (1UL << accBits) - 1;
+    while (b64Bits >= 8) {
+      b64Bits -= 8;
+      const uint8_t packedByte = (b64Buf >> b64Bits) & 0xFF;
+      if (b64Bits == 0) b64Buf = 0;
+      else b64Buf &= (1UL << b64Bits) - 1;
+
+      if (++packedBytes > KITTY_PACKED_BYTES) return false;
+      pixelBuf = (pixelBuf << 8) | packedByte;
+      pixelBits += 8;
+
+      while (pixelBits >= 9 && pixelPos < KITTY_APPROVED_PIXELS) {
+        pixelBits -= 9;
+        const uint16_t paletteIndex = (pixelBuf >> pixelBits) & 0x01FF;
+        if (pixelBits == 0) pixelBuf = 0;
+        else pixelBuf &= (1UL << pixelBits) - 1;
+
+        if (paletteIndex >= 295) return false;
+        pixels[pixelPos++] = pgm_read_word(&kittyApprovedPalette[paletteIndex]);
+      }
     }
   }
 
-  if (outPos != KITTY_PACKED_BYTES) {
-    free(packed);
-    return false;
-  }
-
-  size_t bytePos = 0;
-  uint32_t bitBuf = 0;
-  uint8_t bitCount = 0;
-
-  for (size_t p = 0; p < KITTY_APPROVED_PIXELS; ++p) {
-    while (bitCount < 9) {
-      bitBuf = (bitBuf << 8) | packed[bytePos++];
-      bitCount += 8;
-    }
-
-    bitCount -= 9;
-    const uint16_t paletteIndex = (bitBuf >> bitCount) & 0x01FF;
-    if (bitCount == 0) bitBuf = 0;
-    else bitBuf &= (1UL << bitCount) - 1;
-
-    pixels[p] = pgm_read_word(&kittyApprovedPalette[paletteIndex]);
-  }
-
-  free(packed);
-  return true;
+  return packedBytes == KITTY_PACKED_BYTES &&
+         pixelPos == KITTY_APPROVED_PIXELS;
 }
 
 inline void drawApprovedKitty(Adafruit_GFX &gfx) {

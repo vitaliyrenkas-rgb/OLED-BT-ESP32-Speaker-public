@@ -1,5 +1,4 @@
-// Auto-split from monolithic OLEG sketch.
-// Keep behavioral changes out of this structural split unless explicitly noted.
+// Legacy player helpers retained for RT-003 rollback only.
 
 // ================= PLAYER HELPERS =================
 void drawMarqueeLine(const String &s, int y, int &offset, const uint8_t *font, int left, int right) {

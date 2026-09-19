@@ -1,5 +1,4 @@
-// Auto-split from monolithic OLEG sketch.
-// v3.5-012: OLED sleep-screen bitmap.
+// Legacy sleep-kitty bitmap retained for RT-003 rollback only.
 
 #pragma once
 

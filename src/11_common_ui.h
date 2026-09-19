@@ -1,5 +1,4 @@
-// Auto-split from monolithic OLEG sketch.
-// Keep behavioral changes out of this structural split unless explicitly noted.
+// Legacy monochrome UI reference retained for RT-003 rollback only.
 
 // ================= COMMON UI =================
 void drawTopBar() {

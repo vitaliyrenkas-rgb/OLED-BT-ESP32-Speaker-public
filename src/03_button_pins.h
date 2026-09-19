@@ -1,8 +1,7 @@
-// Auto-split from monolithic OLEG sketch.
-// Keep behavioral changes out of this structural split unless explicitly noted.
+// RT-003 v5.0 button pin map.
 
 // ================= HU-055 BUTTONS / MH-M18-STYLE ADKEY =================
-// OLEG 4.0 Sister keeps the stock 3-button resistor ladder.
+// RT-003 v5.0 keeps the stock HU-055 3-button resistor ladder.
 // One physical ADKEY signal is read through ADC1; order is left-to-right.
 #define ADKEY_ADC_PIN 35
 

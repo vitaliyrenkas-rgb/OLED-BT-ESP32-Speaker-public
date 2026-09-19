@@ -1,5 +1,4 @@
-// Auto-split from monolithic OLEG sketch.
-// Keep behavioral changes out of this structural split unless explicitly noted.
+// RT-003 v5.0 disabled startup-jingle reference.
 
 // ================= STARTUP JINGLE =================
 // void playJingleTone(float freq, int durationMs, float volume = 0.22f) {

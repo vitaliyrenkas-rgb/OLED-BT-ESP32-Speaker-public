@@ -1,5 +1,4 @@
-// Auto-split from monolithic OLEG sketch.
-// Keep behavioral changes out of this structural split unless explicitly noted.
+// RT-003 v5.0 ADKEY button runtime.
 
 // ================= BUTTONS =================
 void setupButtons() {
@@ -39,7 +38,7 @@ const char* buttonDebugName(ButtonId button) {
 }
 
 void logAdkeyCalibration() {
-#if OLEG4_DEBUG_ADKEY
+#if RT003_DEBUG_ADKEY
   static unsigned long lastLog = 0;
   unsigned long now = millis();
 
@@ -84,11 +83,32 @@ void handleShortButton(ButtonId button) {
   manualScreenLock = true;
 
   if (button == BUTTON_PLAYER) {
+    weatherIconPreviewIndex = -1;
     openPlayerScreenFromButton();
   } else if (button == BUTTON_CLOCK) {
+    weatherIconPreviewIndex = -1;
     currentScreen = SCREEN_CLOCK;
   } else if (button == BUTTON_WEATHER) {
-    currentScreen = SCREEN_WEATHER;
+    if (currentScreen == SCREEN_WEATHER) {
+      if (weatherIconPreviewIndex < 0) {
+        if (weatherState == "SUN") {
+          weatherIconPreviewIndex = weatherIsNight ? 1 : 0;
+        } else if (weatherState == "CLOUD") {
+          weatherIconPreviewIndex = 2;
+        } else if (weatherState == "RAIN") {
+          weatherIconPreviewIndex = 3;
+        } else {
+          weatherIconPreviewIndex = 4;
+        }
+      }
+      weatherIconPreviewIndex = (weatherIconPreviewIndex + 1) %
+                                WEATHER_ICON_PREVIEW_COUNT;
+      Serial.print("[WEATHER ICON TEST] index=");
+      Serial.println(weatherIconPreviewIndex);
+    } else {
+      weatherIconPreviewIndex = -1;
+      currentScreen = SCREEN_WEATHER;
+    }
   } else {
     return;
   }

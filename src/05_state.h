@@ -1,5 +1,4 @@
-// Auto-split from monolithic OLEG sketch.
-// Keep behavioral changes out of this structural split unless explicitly noted.
+// RT-003 v5.0 runtime state.
 
 // ================= STATE =================
 #include <WebServer.h>
@@ -20,7 +19,8 @@ struct SpeakerConfig {
   String weatherCity;
   String weatherCountry;
   String btDeviceName;
-  String welcomeText;
+  String welcomeLine1;
+  String welcomeLine2;
   String portalUser;
   String portalPass;
   bool loadedFromNvs;
@@ -62,6 +62,7 @@ String album = "";
 
 // FIX v2.10: real PCM/playback state for timer and EQ.
 volatile uint16_t pcmLevelRaw = 0;
+volatile uint8_t pcmEqBands[4] = {0, 0, 0, 0};
 volatile unsigned long lastPcmAudioMs = 0;
 bool trackTimerRunning = false;
 bool playbackActive = false;
@@ -77,8 +78,8 @@ uint32_t trackElapsedOffsetMs = 0;
 float batteryVoltage = 0.0;
 int batteryPercent = 85;
 bool batteryPresent = true;
-bool batteryCharging = false; // OLEG: true when USB/VBUS is present and battery is not full
-bool usbPowerPresent = false;   // OLEG: GPIO33 USB/VBUS sense through 100k/100k divider
+bool batteryCharging = false; // true when USB/VBUS is present and battery is not full
+bool usbPowerPresent = false; // GPIO33 USB/VBUS sense through 100k/100k divider
 unsigned long batteryLastChargeRiseMs = 0;
 
 int volumePotRaw = 0;
@@ -92,10 +93,16 @@ int volumeOverlayPercent = 100;
 
 float weatherTemp = 23.0;
 float weatherFeels = 24.0;
-int weatherHumidity = -1; // OLEG v3.5-004: relative humidity %, -1 = unknown
+int weatherHumidity = -1; // relative humidity %, -1 = unknown
 String weatherState = "SUN"; // SUN / CLOUD / RAIN / SNOW
-bool weatherIsNight = false;  // OLEG v3.5-001: OpenWeather icon suffix n/d
+bool weatherIsNight = false; // OpenWeather icon suffix n/d
 String weatherDesc = "Погода";
+
+// RT-003 v5.0 RC2 hardware preview.
+// -1 keeps the real OpenWeather icon. Repeated presses of the Weather button
+// while the Weather screen is already open cycle the five existing variants.
+int8_t weatherIconPreviewIndex = -1;
+constexpr uint8_t WEATHER_ICON_PREVIEW_COUNT = 5;
 
 unsigned long lastDraw = 0;
 unsigned long lastBattery = 0;

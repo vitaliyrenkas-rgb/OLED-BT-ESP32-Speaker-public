@@ -1,5 +1,4 @@
-// Auto-split from monolithic OLEG sketch.
-// Keep behavioral changes out of this structural split unless explicitly noted.
+// RT-003 v5.0 Wi-Fi, time, weather and config portal.
 
 // ================= WIFI / TIME / WEATHER =================
 void connectWiFi() {
@@ -31,9 +30,13 @@ void setupTimeOnce() {
     return;
   }
 
-  if (ntpConfigured && ntpSynced) return;
-
   Serial.println("Configuring NTP...");
+
+  // 4.0-011 fix: deep sleep preserves plausible RTC time. Clear it so
+  // getLocalTime() cannot accept stale time before a real SNTP response.
+  struct timeval resetTime = {0, 0};
+  settimeofday(&resetTime, nullptr);
+
   configTzTime(TZ_INFO, "pool.ntp.org", "time.nist.gov");
   ntpConfigured = true;
 
@@ -51,8 +54,13 @@ void setupTimeOnce() {
     delay(100);
   }
 
-  if (ntpSynced) Serial.println("NTP synced");
-  else Serial.println("NTP failed: time not synced");
+  if (ntpSynced) {
+    Serial.printf("NTP synced: %04d-%02d-%02d %02d:%02d:%02d\n",
+                  t.tm_year + 1900, t.tm_mon + 1, t.tm_mday,
+                  t.tm_hour, t.tm_min, t.tm_sec);
+  } else {
+    Serial.println("NTP failed: time not synced");
+  }
 }
 
 void updateWeatherFromAPI() {
@@ -141,7 +149,7 @@ void updateWeatherCycle() {
 
 // ================= CONFIG PORTAL =================
 // v3.5-009: AP/local web UI only. Do not keep Wi-Fi active during A2DP audio.
-const char* CONFIG_PORTAL_AP_SSID = "OLEG-SETUP";
+const char* CONFIG_PORTAL_AP_SSID = "RT-003-SETUP";
 const char* CONFIG_PORTAL_URL = "http://192.168.4.1";
 const unsigned long CONFIG_PORTAL_BOOT_HOLD_MS = 7000UL;
 
@@ -212,14 +220,14 @@ String buildConfigPortalPage(const String& notice = "") {
 
   html += F("<!doctype html><html lang=\"uk\"><head><meta charset=\"utf-8\">");
   html += F("<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">");
-  html += F("<title>OLEG Config Portal</title>");
+  html += F("<title>RT-003 v5.0 Config Portal</title>");
   html += F("<style>");
   html += F("body{margin:0;background:#111;color:#eee;font-family:Arial,sans-serif;}main{max-width:520px;margin:0 auto;padding:18px;}");
   html += F("h1{font-size:24px;margin:8px 0 4px}.card{background:#1d1d1d;border:1px solid #333;border-radius:14px;padding:16px;box-shadow:0 0 18px #0006}");
   html += F("label{display:block;margin:13px 0 5px;font-size:14px;color:#ccc}input{box-sizing:border-box;width:100%;margin-top:5px;padding:11px;border-radius:9px;border:1px solid #555;background:#090909;color:#fff;font-size:16px}");
   html += F("button{width:100%;margin-top:18px;padding:12px;border:0;border-radius:10px;background:#f5c542;color:#111;font-weight:700;font-size:16px}.hint{font-size:13px;color:#aaa;line-height:1.35}.ok{background:#173b25;border:1px solid #2d7a48;color:#b9f7c8;padding:10px;border-radius:9px}.info{display:inline-block;margin-left:6px;color:#f5c542;text-decoration:none;font-weight:700}.small{font-size:12px;color:#888}");
-  html += F("</style></head><body><main><h1>OLEG Config Portal</h1>");
-  html += F("<p class=\"hint\">AP: <b>OLEG-SETUP</b><br>URL: <b>http://192.168.4.1</b></p>");
+  html += F("</style></head><body><main><h1>RT-003 v5.0 Config Portal</h1>");
+  html += F("<p class=\"hint\">AP: <b>RT-003-SETUP</b><br>URL: <b>http://192.168.4.1</b></p>");
 
   if (notice.length() > 0) {
     html += "<p class=\"ok\">";
@@ -248,7 +256,10 @@ String buildConfigPortalPage(const String& notice = "") {
   html += F("</datalist>");
 
   appendPortalInput(html, "BT device name", "btName", speakerConfig.btDeviceName);
-  appendPortalInput(html, "Welcome screen text", "welcome", speakerConfig.welcomeText);
+  appendPortalInput(html, "Greeting line 1", "welcome1", speakerConfig.welcomeLine1,
+                    "text", "maxlength=\"24\"");
+  appendPortalInput(html, "Greeting line 2", "welcome2", speakerConfig.welcomeLine2,
+                    "text", "maxlength=\"24\"");
   appendPortalInput(html, "Portal user", "portalUser", speakerConfig.portalUser);
   appendPortalInput(html, "Portal password", "portalPass", speakerConfig.portalPass, "password");
 
@@ -283,7 +294,8 @@ void handleConfigPortalSave() {
   speakerConfig.weatherApiKey = configPortalServer.arg("weatherKey");
   speakerConfig.weatherLocation = configPortalServer.arg("weatherLoc");
   speakerConfig.btDeviceName = configPortalServer.arg("btName");
-  speakerConfig.welcomeText = configPortalServer.arg("welcome");
+  speakerConfig.welcomeLine1 = configPortalServer.arg("welcome1");
+  speakerConfig.welcomeLine2 = configPortalServer.arg("welcome2");
   speakerConfig.portalUser = configPortalServer.arg("portalUser");
   speakerConfig.portalPass = configPortalServer.arg("portalPass");
 
@@ -291,7 +303,8 @@ void handleConfigPortalSave() {
   speakerConfig.weatherApiKey.trim();
   speakerConfig.weatherLocation.trim();
   speakerConfig.btDeviceName.trim();
-  speakerConfig.welcomeText.trim();
+  speakerConfig.welcomeLine1.trim();
+  speakerConfig.welcomeLine2.trim();
   speakerConfig.portalUser.trim();
   speakerConfig.portalPass.trim();
 
@@ -309,7 +322,7 @@ void handleConfigPortalNotFound() {
 void drawConfigPortalScreen(const char* statusLine) {
   tft.fillScreen(TftUiTheme::BG);
   tft.drawRect(5, 10, 150, 108, TftUiTheme::FG);
-  centerText("OLEG-SETUP", 39, u8g2_font_7x14B_tf);
+  centerText("RT-003 SETUP", 39, u8g2_font_7x14B_tf);
   centerText("192.168.4.1", 68, u8g2_font_7x14_tf);
   centerText(statusLine, 96, u8g2_font_6x12_tf);
   tftUi.invalidate();

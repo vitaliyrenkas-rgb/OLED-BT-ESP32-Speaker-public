@@ -1,5 +1,4 @@
-// Auto-split from monolithic OLEG sketch.
-// Keep behavioral changes out of this structural split unless explicitly noted.
+// Legacy monochrome icon reference retained for RT-003 rollback only.
 
 // ================= ICONS =================
 void drawBTIconSmall(int x, int y) {
@@ -28,10 +27,10 @@ void drawWiFiIcon(int x, int y, bool connected) {
   u8g2.drawPixel(x + 0, y + 5);
   u8g2.drawPixel(x + 1, y + 4);
   u8g2.drawPixel(x + 2, y + 3);
-  u8g2.drawPixel(x + 3, y + 3);  // OLEG v3.5-002: bridge top gap
-  u8g2.drawPixel(x + 5, y + 3);  // OLEG v3.5-002: bridge top gap
-  u8g2.drawPixel(x + 4, y + 2);  // OLEG v3.5-002: bridge top gap
-  u8g2.drawPixel(x + 4, y + 4);  // OLEG v3.5-002: bridge top gap
+  u8g2.drawPixel(x + 3, y + 3);  // bridge top gap
+  u8g2.drawPixel(x + 5, y + 3);  // bridge top gap
+  u8g2.drawPixel(x + 4, y + 2);  // bridge top gap
+  u8g2.drawPixel(x + 4, y + 4);  // bridge top gap
   u8g2.drawPixel(x + 6, y + 3);
   u8g2.drawPixel(x + 7, y + 4);
   u8g2.drawPixel(x + 8, y + 5);
@@ -51,8 +50,8 @@ void drawWiFiIcon(int x, int y, bool connected) {
   u8g2.drawPixel(x + 4, y + 9);
 
   if (!connected) {
-    // OLEG: crossed Wi-Fi, clipped inside 9x10 icon.
-    // No negative coordinates: avoids vertical OLED artefact.
+    // Crossed Wi-Fi, clipped inside the 9x10 icon.
+    // No negative coordinates: avoids vertical display artefacts.
     u8g2.drawPixel(x + 8, y + 2);
     u8g2.drawPixel(x + 7, y + 3);
     u8g2.drawPixel(x + 6, y + 4);
@@ -125,8 +124,7 @@ void drawSunIcon(int x, int y) {
 }
 
 void drawMoonIcon(int x, int y) {
-  // OLEG v3.5-001:
-  // Night variant for clear sky. Small filled crescent, readable on 128x64 OLED.
+  // Night variant for clear sky. Small filled crescent for the legacy display.
   u8g2.drawDisc(x + 8, y + 8, 6);
   u8g2.setDrawColor(0);
   u8g2.drawDisc(x + 11, y + 6, 6);
