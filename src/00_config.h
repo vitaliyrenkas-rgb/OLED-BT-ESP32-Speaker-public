@@ -12,7 +12,7 @@ const char* TZ_INFO = "EET-2EEST,M3.5.0/3,M10.5.0/4";
 
 const uint32_t CONFIG_VERSION = 1;
 
-const char* BUILD_VERSION = "5.0-016";
+const char* BUILD_VERSION = "5.0-017";
 
 const unsigned long WEATHER_UPDATE_INTERVAL = 1UL * 60UL * 60UL * 1000UL;
 const unsigned long SLEEP_SCREEN_IDLE_MS = 5UL * 60UL * 1000UL;

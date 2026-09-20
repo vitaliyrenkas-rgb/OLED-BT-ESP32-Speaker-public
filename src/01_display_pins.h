@@ -7,7 +7,7 @@ constexpr int TFT_CS   = 19;
 constexpr int TFT_DC   = 22;
 constexpr int TFT_RST  = 16;
 constexpr int TFT_MISO = -1;
-constexpr int TFT_BL   = 14;
+constexpr int TFT_BL   = 17;
 
 constexpr uint8_t TFT_ROTATION = 3;
 constexpr uint32_t TFT_SPI_HZ = 27000000UL;

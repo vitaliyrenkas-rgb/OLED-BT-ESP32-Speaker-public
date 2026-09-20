@@ -17,7 +17,7 @@
 
 // =====================================================
 // RT-003 v5.0 — ESP32 LoLin32 / HU-055 / 1.8-inch ST7735.
-// Firmware build 5.0-016. Real hardware only; not for Wokwi.
+// Firmware build 5.0-017. Real hardware only; not for Wokwi.
 // Structured as one Arduino translation unit through ordered src headers.
 // =====================================================
 
