@@ -1,33 +1,40 @@
 // RT-003 v5.0 Wi-Fi, time, weather and config portal.
 
 // ================= WIFI / TIME / WEATHER =================
-void connectWiFi() {
-  if (WiFi.status() == WL_CONNECTED) return;
+bool connectWiFi() {
+  if (WiFi.status() == WL_CONNECTED) return true;
 
   WiFi.mode(WIFI_STA);
 
   // Important for ESP32 Wi-Fi + Bluetooth coexistence.
   // Do NOT use WiFi.setSleep(false) with active Bluetooth A2DP.
   WiFi.setSleep(true);
+  WiFi.setAutoReconnect(false);
 
   if (speakerConfig.wifiSsid.length() == 0) {
     Serial.println("WiFi skipped: empty SSID");
-    return;
+    return false;
   }
 
   WiFi.begin(speakerConfig.wifiSsid.c_str(), speakerConfig.wifiPass.c_str());
 
   unsigned long start = millis();
-  while (WiFi.status() != WL_CONNECTED && millis() - start < 12000) {
+  while (WiFi.status() != WL_CONNECTED &&
+         millis() - start < WIFI_CONNECT_TIMEOUT_MS) {
     delay(200);
   }
+
+  bool connected = WiFi.status() == WL_CONNECTED;
+  Serial.print("WiFi association: ");
+  Serial.println(connected ? "OK" : "FAIL/TIMEOUT");
+  return connected;
 }
 
-void setupTimeOnce() {
+bool setupTimeOnce() {
   if (WiFi.status() != WL_CONNECTED) {
     Serial.println("NTP skipped: WiFi not connected");
     ntpSynced = false;
-    return;
+    return false;
   }
 
   Serial.println("Configuring NTP...");
@@ -44,7 +51,7 @@ void setupTimeOnce() {
   unsigned long start = millis();
   ntpSynced = false;
 
-  while (millis() - start < 15000) {
+  while (millis() - start < NTP_SYNC_TIMEOUT_MS) {
     if (getLocalTime(&t, 1000) && t.tm_year >= (2024 - 1900)) {
       ntpSynced = true;
       break;
@@ -61,10 +68,15 @@ void setupTimeOnce() {
   } else {
     Serial.println("NTP failed: time not synced");
   }
+
+  return ntpSynced;
 }
 
-void updateWeatherFromAPI() {
-  if (WiFi.status() != WL_CONNECTED) return;
+bool updateWeatherFromAPI() {
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("Weather skipped: WiFi not connected");
+    return false;
+  }
 
   HTTPClient http;
 
@@ -77,7 +89,7 @@ void updateWeatherFromAPI() {
 
   if (weatherCity.length() == 0 || weatherApiKey.length() == 0) {
     Serial.println("Weather skipped: missing city/API key");
-    return;
+    return false;
   }
 
   String weatherQuery = weatherCity;
@@ -91,8 +103,16 @@ void updateWeatherFromAPI() {
                "&appid=" + weatherApiKey +
                "&units=metric&lang=ua";
 
-  http.begin(url);
+  http.setConnectTimeout(WEATHER_HTTP_CONNECT_TIMEOUT_MS);
+  http.setTimeout(WEATHER_HTTP_READ_TIMEOUT_MS);
+
+  if (!http.begin(url)) {
+    Serial.println("Weather HTTP begin failed");
+    return false;
+  }
+
   int httpCode = http.GET();
+  bool weatherOk = false;
 
   if (httpCode == 200) {
     String payload = http.getString();
@@ -116,21 +136,35 @@ void updateWeatherFromAPI() {
       else if (weatherId >= 600 && weatherId < 700) weatherState = "SNOW";
       else if (weatherId >= 801 && weatherId < 900) weatherState = "CLOUD";
       else weatherState = "SUN";
+
+      weatherOk = true;
+    } else {
+      Serial.print("Weather JSON failed: ");
+      Serial.println(error.c_str());
     }
+  } else {
+    Serial.printf("Weather HTTP failed: %d (%s)\n",
+                  httpCode,
+                  HTTPClient::errorToString(httpCode).c_str());
   }
 
   http.end();
+  return weatherOk;
 }
 
 void updateWeatherCycle() {
   Serial.println("WiFi/NTP/weather startup sync...");
 
-  connectWiFi();
+  bool wifiAssociated = connectWiFi();
+  bool timeOk = false;
+  bool weatherOk = false;
 
-  if (WiFi.status() == WL_CONNECTED) {
-    setupTimeOnce();
-    updateWeatherFromAPI();
-    wifiLastSyncOk = ntpSynced;
+  if (wifiAssociated) {
+    // NTP failure does not prove that all internet access is down, so weather
+    // still gets its own bounded attempt.
+    timeOk = setupTimeOnce();
+    weatherOk = updateWeatherFromAPI();
+    wifiLastSyncOk = timeOk;
   } else {
     wifiLastSyncOk = false;
   }
@@ -142,8 +176,9 @@ void updateWeatherCycle() {
 
   lastWeatherUpdate = millis();
 
-  Serial.print("WiFi sync result: ");
-  Serial.println(wifiLastSyncOk ? "OK" : "FAIL");
+  Serial.printf("WiFi sync result: NTP=%s WEATHER=%s; continuing to Bluetooth\n",
+                timeOk ? "OK" : "FAIL",
+                weatherOk ? "OK" : "FAIL");
 }
 
 
